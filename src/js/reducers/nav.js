@@ -2,18 +2,9 @@ import { NAV_ACTIVATE } from "../actions";
 
 const initialState = {
   active: false,
-  itemsAdmin:[
-    { path: '/', label: 'Home'},
-    { path: '/buyer', label: 'Buyer'},
-    { path: '/user', label: 'User'}
-  ],
   items:[
     { path: '/', label: 'Home'},
-    { path: '/fit', label: 'Fit'},
-    { path: '/sku', label: 'SKU'},
-    { path: '/sales', label: 'Sales Data'},
-    { path: '/proposal', label: 'Proposal'},
-    { path: '/template', label: 'Template'}
+    { path: '/test', label: 'Test Page'}
   ]
 };
 

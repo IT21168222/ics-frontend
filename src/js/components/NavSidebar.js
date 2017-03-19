@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
+import { localeData } from '../reducers/localization';
 
 import Sidebar from "grommet/components/Sidebar";
 import Header from "grommet/components/Header";
@@ -18,14 +19,17 @@ class NavSidebar extends Component {
     this._onClose = this._onClose.bind(this);
   }
 
+  componentWillMount () {
+    this.setState({localeData: localeData()});
+  }
+
   _onClose () {
     console.log('Close Button clicked');
     this.props.dispatch(navActivate(false));
   }
 
   render () {
-    const { items: itemsDefault } = this.props.nav;
-    const items = itemsDefault;
+    const { items } = this.props.nav;
     var links = items.map( (page, index) => {
       var value = (page.path == this.props.routePath) ? 'active' : '';
       return (
@@ -35,9 +39,7 @@ class NavSidebar extends Component {
     return (
       <Sidebar colorIndex="neutral-1" size="small">
         <Header pad="medium" justify="between" >
-          <Title>
-            VMI
-          </Title>
+          <Title>{this.state.localeData.APP_NAME_SHORT}</Title>
           <Button icon={<Close />} onClick={this._onClose} />
         </Header>
         <Menu fill={true} primary={true}>
