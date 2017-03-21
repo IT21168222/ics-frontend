@@ -4,6 +4,12 @@ module.exports = {
 
   /*/////////////////// Label /////////////////////*/
   "label_home": "Home",
+  "label_user": "User",
+  "label_category": "Category",
+  "label_sub_category": "Sub Category",
+  "label_product": "Product",
+  "label_section": "Section",
+  "label_supplier": "Supplier",
   "label_test": "Test Page",
 
 

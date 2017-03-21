@@ -15,6 +15,10 @@ import store from "./store";
   //window.serviceHost = "http://localhost:8888/vmi/api";
 })();*/
 
+(function () {
+  window.sessionStorage.setItem('role','ADMIN');
+})();
+
 let element = document.getElementById('content');
 ReactDOM.render((
   <div>

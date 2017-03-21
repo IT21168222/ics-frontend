@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
 import { localeData } from '../reducers/localization';
+import { ROLE_ADMIN, ROLE_PURCHASE, ROLE_STORE, ROLE_USER} from '../utils/constants';
 
 import Sidebar from "grommet/components/Sidebar";
 import Header from "grommet/components/Header";
@@ -29,11 +30,22 @@ class NavSidebar extends Component {
   }
 
   render () {
-    const { items } = this.props.nav;
+    const { itemsAdmin, itemsStore, itemsPurchase, itemsUser } = this.props.nav;
+    const { role } = window.sessionStorage;
+    let items;
+    if (role == ROLE_ADMIN) {
+      items = itemsAdmin;
+    } else if (role == ROLE_PURCHASE) {
+      items = itemsPurchase;
+    } else if (role == ROLE_STORE) {
+      items = itemsStore;
+    } else if (role == ROLE_USER) {
+      items = itemsUser;
+    }
+
     var links = items.map( (page, index) => {
-      var value = (page.path == this.props.routePath) ? 'active' : '';
       return (
-        <Anchor className={value} key={page.label} path={page.path} label={page.label} />
+        <Anchor  key={page.label} path={page.path} label={page.label} />
       );
     });
     return (
