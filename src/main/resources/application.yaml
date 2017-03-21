@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:ics.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    format-sql: true
+#    hibernate:
+#      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLiteDialect
