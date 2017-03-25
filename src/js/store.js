@@ -5,9 +5,11 @@ import thunk from "redux-thunk";
 import promise from "redux-promise-middleware";
 
 import nav from "./reducers/nav";
+import category from "./reducers/category";
 
 const reducer = combineReducers({
-  nav
+  nav,
+  category
 });
 
 const middleware = applyMiddleware(promise(), thunk, logger());
