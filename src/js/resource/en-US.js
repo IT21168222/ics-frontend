@@ -28,6 +28,12 @@ module.exports = {
  /////////////////////// Sub Category ////////////////////////
   "sub_category_empty_message": "No Category available at the moment",
 
+   /////////////////////// Supplier ////////////////////////
+  "label_supplier_add": "Add Supplier",
+  "label_supplier_edit": "Update Supplier",
+  "supplier_add_btn": "Add",
+  "supplier_edit_btn": "Update",
+
   "test": "test"
 
 };
