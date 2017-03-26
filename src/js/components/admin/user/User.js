@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { localeData } from '../../reducers/localization';
+import { localeData } from '../../../reducers/localization';
 
-import * as userAction  from '../../actions/user';
-import * as c  from '../../utils/constants';
+import * as userAction  from '../../../actions/user';
+import * as c  from '../../../utils/constants';
 
-import AppHeader from '../AppHeader';
+import AppHeader from '../../AppHeader';
 import Add from "grommet/components/icons/base/Add";
 import Box from 'grommet/components/Box';
 import Button from 'grommet/components/Button';

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { localeData } from '../../reducers/localization';
+import { localeData } from '../../../reducers/localization';
 
-import AppHeader from '../AppHeader';
+import AppHeader from '../../AppHeader';
 import Box from 'grommet/components/Box';
 import Section from 'grommet/components/Section';
 

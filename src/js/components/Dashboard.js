@@ -18,7 +18,7 @@ class Dashboard extends Component {
   render () {
     return (
       <Box>
-        <AppHeader page={this.state.localeData.label_home} />
+        <AppHeader />
         <Section direction="column" pad={{vertical: 'large', horizontal:'small'}}>
           <h1>Welcome to Inventory Control System Application</h1>
         </Section>

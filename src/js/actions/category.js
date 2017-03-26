@@ -25,8 +25,6 @@ export function addCategory (category) {
 
   return function (dispatch) {
     console.log(category);
-    dispatch({type: c.CATEGORY_ADD_PROGRESS});
-
     axios.post(window.serviceHost + '/categories', JSON.stringify(category), {headers: {'Content-Type':'application/json'}})
     .then((response) => {
       console.log(response);
@@ -44,8 +42,6 @@ export function updateCategory (category) {
   console.log('updateCategory');
   return function (dispatch) {
     console.log(category);
-    dispatch({type: c.CATEGORY_EDIT_PROGRESS});
-
     axios.put(category._links.self.href, JSON.stringify(category),{headers: {'Content-Type':'application/json'}})
     .then((response) => {
       console.log(response);
@@ -54,7 +50,7 @@ export function updateCategory (category) {
       }
     }).catch( (err) => {
       console.log(err);
-      dispatch({type: c.CATEGORY_ADD_FAIL});
+      dispatch({type: c.CATEGORY_EDIT_FAIL});
     });
   };
 }

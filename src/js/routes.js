@@ -1,11 +1,11 @@
-import Category from "./components/admin/Category";
+import Category from "./components/admin/category/Category";
 import Dashboard from "./components/Dashboard";
 import Main from "./components/Main";
-import Product from "./components/admin/Product";
-import Section from "./components/admin/Section";
-import SubCategory from "./components/admin/SubCategory";
-import Supplier from "./components/admin/Supplier";
-import User from "./components/admin/User";
+import Product from "./components/admin/product/Product";
+import Section from "./components/admin/section/Section";
+import SubCategory from "./components/admin/subCategory/SubCategory";
+import Supplier from "./components/admin/supplier/Supplier";
+import User from "./components/admin/user/User";
 import Test from "./components/Test";
 
 export default {

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { localeData } from '../../reducers/localization';
+import { localeData } from '../../../reducers/localization';
 
-import AppHeader from '../AppHeader';
+import AppHeader from '../../AppHeader';
 import Box from 'grommet/components/Box';
 import Section from 'grommet/components/Section';
 
-class SubCategory extends Component {
+class Product extends Component {
   
   constructor () {
     super();
@@ -18,13 +18,13 @@ class SubCategory extends Component {
   render() {
     return (
       <Box>
-        <AppHeader page={this.state.localeData.label_sub_category}/>
+        <AppHeader page={this.state.localeData.label_product}/>
         <Section>
-          <h1>SubCategory Navigation page</h1>
+          <h1>Product Navigation page</h1>
         </Section>
       </Box>
     );
   }
 }
 
-export default SubCategory;
+export default Product;

@@ -23,6 +23,11 @@ module.exports = {
   "login_error": "Some error occured logging.",
 
   /////////////////////// Category ////////////////////////
-  "category_empty_message": "No Category available at the moment"
+  "category_empty_message": "No Category available at the moment",
+
+ /////////////////////// Sub Category ////////////////////////
+  "sub_category_empty_message": "No Category available at the moment",
+
+  "test": "test"
 
 };
