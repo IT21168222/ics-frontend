@@ -46,15 +46,15 @@ class SubCategory extends Component {
     this.localeData = localeData();
     this._loadSubCategory = this._loadSubCategory.bind(this);
     this._subCategorySort = this._subCategorySort.bind(this);
-    this._getUnfilteredCount = this._getUnfilteredCount.bind(this);
   }
 
   componentWillMount () {
     console.log('componentWillMount');
-    if (!this.props.category.loaded) {
+    const {loaded,categories,filter,sort} = this.props.category;
+    if (!loaded) {
       this.props.dispatch(getCategories());
     } else {
-
+      this._loadSubCategory(categories,filter,sort);
       this.setState({cFilter: this.props.category.categories[0].name});
     }
   }
@@ -64,22 +64,14 @@ class SubCategory extends Component {
     if (!this.props.category.loaded && nextProps.category.loaded) {
       this.setState({cFilter: nextProps.category.categories[0].name});
     }
+    if (this.props.category.toggleStatus != nextProps.category.toggleStatus) {
+      const {categories,filter,sort} = nextProps.category;
+      this._loadSubCategory(categories,filter,sort);
+    }
   }
 
-  _getUnfilteredCount () {
-    let {categories} = this.props.category;
-    let x = 0;
-    categories.forEach(c => {
-      c.subCategoryList.forEach(sc => {
-        x++;
-      });
-    });
-    return x;
-  }
-
-  _loadSubCategory () {
+  _loadSubCategory (categories,filter,sort) {
     console.log("_loadSubCategory()");
-    let {categories,filter,sort} = this.props.category;
     let list1 = [] ;
     categories.forEach(c => {
       c.subCategoryList.forEach(sc => {
@@ -90,10 +82,10 @@ class SubCategory extends Component {
       const categoryFilter = filter.category;
       let list2 = list1.filter(sc => categoryFilter.includes(sc.category.name));
       list2 = this._subCategorySort(list2,sort);
-      return list2;     
+      this.setState({subCategories: list2, filteredCount: list2.length, unfilteredCount: list1.length});    
     } else {
       list1 = this._subCategorySort(list1,sort);
-      return list1;
+      this.setState({subCategories: list1, filteredCount: list1.length, unfilteredCount: list1.length}); 
     }
   }
 
@@ -187,15 +179,11 @@ class SubCategory extends Component {
 
   render() {
     const {fetching, adding, editing,categories} = this.props.category;
-    const { /*subCategories, */subCategory, errors, searchText, filterActive, cFilter } = this.state;
+    const { subCategories, subCategory, errors, searchText, filterActive,filteredCount,unfilteredCount, cFilter } = this.state;
 
-    //const filter = (cFilter == undefined && categories.length != 0) ? categories[0].name : cFilter; 
     const loading = fetching ? (<Spinning />) : null;
 
-    let x = this._loadSubCategory();
-    const filteredCount = x.length;
-    const unfilteredCount = this._getUnfilteredCount();
-    const items = x.map((sc, index)=>{
+    const items = subCategories.map((sc, index)=>{
       return (
         <TableRow key={index}  >
           <td >{sc.category.name}</td>
