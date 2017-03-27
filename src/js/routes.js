@@ -2,6 +2,8 @@ import Category from "./components/admin/category/Category";
 import Dashboard from "./components/Dashboard";
 import Main from "./components/Main";
 import Product from "./components/admin/product/Product";
+import ProductAdd from "./components/admin/product/ProductAdd";
+import ProductEdit from "./components/admin/product/ProductEdit";
 import Section from "./components/admin/section/Section";
 import SubCategory from "./components/admin/subCategory/SubCategory";
 import Supplier from "./components/admin/supplier/Supplier";
@@ -17,6 +19,8 @@ export default {
   childRoutes: [
     { path: 'category', component: Category},
     { path: 'product', component: Product},
+    { path: 'product/add', component: ProductAdd},
+    { path: 'product/edit', component: ProductEdit},
     { path: 'section', component: Section},
     { path: 'subCategory', component: SubCategory},
     { path: 'supplier', component: Supplier},

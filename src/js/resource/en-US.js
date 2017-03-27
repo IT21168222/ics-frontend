@@ -34,6 +34,12 @@ module.exports = {
   "supplier_add_btn": "Add",
   "supplier_edit_btn": "Update",
 
+     /////////////////////// Product ////////////////////////
+  "label_product_add": "Add Product",
+  "label_product_edit": "Update Product",
+  "product_add_btn": "Add",
+  "product_edit_btn": "Update",
+
   "test": "test"
 
 };

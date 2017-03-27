@@ -5,6 +5,10 @@ import AppHeader from './AppHeader';
 import Box from 'grommet/components/Box';
 import Button from 'grommet/components/Button';
 import Section from 'grommet/components/Section';
+import Table from 'grommet/components/Table';
+//import TableRow from 'grommet/components/TableRow';
+//import Tiles from 'grommet/components/Tiles';
+//import Tile from 'grommet/components/Tile';
 
 import * as userAction  from '../actions/user';
 
@@ -44,6 +48,21 @@ class Test extends Component {
 
           <Button label='Click' onClick={this._onTest.bind(this,'hello')} />
           <Button label='Label' onClick={this._onClick}  />
+
+          <Box full="horizontal" wrap={true} size='full'>
+            <Table style={{overflowX: 'scroll'}}>
+              <thead>
+                <tr>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                  <th>ABCDEFGHIJKLMNOPQRSTUVWXYZ</th>
+                </tr>
+              </thead>
+            </Table>
+          </Box>
 
         </Section>
       </Box>

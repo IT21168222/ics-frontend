@@ -1,4 +1,4 @@
-import {CATEGORY_CONSTANTS as c, SUB_CATEGORY_CONSTANTS as sc} from "../utils/constants";
+import {CATEGORY_CONSTANTS as c, SUB_CATEGORY_CONSTANTS as sc, PRODUCT_CONSTANTS as p} from "../utils/constants";
 
 const initialState = {
   loaded: false,
@@ -70,6 +70,42 @@ const handlers = {
     let i = categories.findIndex(c=> c._links.self.href === subCategory._links.category.href);
     let category = categories[i];
     category.subCategoryList = category.subCategoryList.filter(sc => sc.id != subCategory.id);
+    categories[i] = category;
+    return ({toggleStatus: !_.toggleStatus,categories: categories});
+  },
+  //////////////////////////////////////////////// Product /////////////////////////////////////////////////////////
+  [p.PRODUCT_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
+  [p.PRODUCT_ADD_SUCCESS]: (_, action) => {
+    const product = action.payload.product;
+    let categories = _.categories;
+    const i = categories.findIndex(c=> c.id === product.category.id);
+    const j = categories[i].subCategoryList.findIndex(sc=> sc.id === product.subCategory.id);
+    let subCategory = categories[i].subCategoryList[j];
+    subCategory.productList.push(product);
+    categories[i].subCategoryList[j] = subCategory;
+    return ({adding: false, toggleStatus: !_.toggleStatus, categories: categories});
+  },
+  [p.PRODUCT_ADD_FAIL]: (_, action) => ({adding: false}),
+  [p.PRODUCT_EDIT_FORM_TOGGLE]: (_, action) => ({editing: action.payload.editing}),
+  [p.PRODUCT_EDIT_SUCCESS]: (_, action) => {
+    const product = action.payload.product;
+    //console.log(product);
+    let categories = _.categories;
+    let i = categories.findIndex(c=> c._links.self.href === product._links.category.href);
+    let category = categories[i];
+    //console.log(category.productList);
+    let j = category.productList.findIndex(p => p.id === product.id);
+    category.productList[j] = product;
+    categories[i] = category;
+    return ({editing: false,toggleStatus: !_.toggleStatus, categories: categories});
+  },
+  [p.PRODUCT_EDIT_FAIL]: (_, action) => ({editing: false}),
+  [p.PRODUCT_REMOVE_SUCCESS]: (_, action) => {
+    const product = action.payload.product;
+    let categories = _.categories;
+    let i = categories.findIndex(c=> c._links.self.href === product._links.category.href);
+    let category = categories[i];
+    category.productList = category.productList.filter(p => p.id != product.id);
     categories[i] = category;
     return ({toggleStatus: !_.toggleStatus,categories: categories});
   }
