@@ -39,10 +39,11 @@ export function updateProduct (url,product) {
 
 export function removeProduct (product) {
   console.log('removeProduct');
+  const url = window.serviceHost + '/categories/' + product.category.id + "/subCategories/" + product.subCategory.id + "/products/" + product.id;
   return function (dispatch) {
     console.log(product);
 
-    axios.delete(product._links.self.href)
+    axios.delete(url)
     .then((response) => {
       console.log(response);
       dispatch({type: c.PRODUCT_REMOVE_SUCCESS, payload: {product: product}});

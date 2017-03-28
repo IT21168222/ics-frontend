@@ -4,6 +4,7 @@ import { localeData } from '../../../reducers/localization';
 import {updateProduct}  from '../../../actions/product';
 import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
 
+import AddIcon from "grommet/components/icons/base/Add";
 import AppHeader from '../../AppHeader';
 import Article from 'grommet/components/Article';
 import Header from 'grommet/components/Header';
@@ -17,7 +18,11 @@ import Section from 'grommet/components/Section';
 import Select from 'grommet/components/Select';
 import Button from 'grommet/components/Button';
 import CloseIcon from 'grommet/components/icons/base/Close';
+import TrashIcon from 'grommet/components/icons/base/Trash';
 import Anchor from 'grommet/components/Anchor';
+import Layer from 'grommet/components/Layer';
+import List from 'grommet/components/List';
+import ListItem from 'grommet/components/ListItem';
 
 
 class ProductEdit extends Component {
@@ -26,64 +31,231 @@ class ProductEdit extends Component {
     super();
 
     this.state = {
-      product: null,
-      errors: []
+      product: {},
+      errors: [],
+      layer: {
+        name: '',                             // name of layer under operation [section|supplier]
+        "section": {
+          title: 'Add Section',
+          label: 'Sections',
+          filterValue: 'Select Section',
+          filterItems: [],                    //Available items for selection
+          selectedItems: []                   //Selected Items
+        },
+        "supplier": {
+          title: 'Add Supplier',
+          label: 'Suppliers',
+          filterValue: 'Select Supplier',
+          filterItems: [],                     //Available items for selection
+          selectedItems: []                     //Selected Items
+        }
+      }
+      
     };
 
     this.localeData = localeData();
   }
 
   componentWillMount () {
-    console.log('componentWillMount');
-    let {product} = this.props.product;
-    if ( product.address == null) {
-      product.address = {};
-    }
-    console.log(product);
-    this.setState({product: product});
+    const {section: {sections},supplier: {suppliers},category: {categories, product}} = this.props;
+    let {layer,category,subCategory} = this.state;
+
+    const list = categories.map(c => c.name);
+    layer.section.filterItems = sections.filter(s => !product.sectionList.map(p => p.name).includes(s.name)).map(sec => sec.name);
+    layer.supplier.filterItems = suppliers.filter(s => !product.supplierList.map(p => p.name).includes(s.name)).map(sup => sup.name);
+
+    layer.section.selectedItems = sections.filter(s => product.sectionList.map(p => p.name).includes(s.name));
+    layer.supplier.selectedItems = suppliers.filter(s => product.supplierList.map(p => p.name).includes(s.name));
+
+    this.setState({categories: list, category, subCategory, layer, product});
   }
 
   componentWillReceiveProps (nextProps) {
-    if (!nextProps.product.editing) {
+    if (!nextProps.category.adding) {
       this.context.router.push('/product');
     }
   }
 
-  _onSubmit (event) {
+  _onSubmit (event) {     //Main Form Submit
     event.preventDefault();
-    let {product} = this.state;
-    if (Object.getOwnPropertyNames(product.address).length === 0) {
-      delete product.address;
+    let {product,layer} = this.state;
+
+    let url = window.serviceHost + '/categories/' + product.category.id + '/subCategories/' + product.subCategory.id + '/products/' + product.id;
+    
+    product.sections = layer.section.selectedItems.map(s => s._links.self.href);
+    product.suppliers = layer.supplier.selectedItems.map(s => s._links.self.href);
+
+    if (Object.getOwnPropertyNames(product.sections).length === 0) {
+      delete product.sections;
     }
+    if (Object.getOwnPropertyNames(product.suppliers).length === 0) {
+      delete product.suppliers;
+    }
+    delete product.category;
+    delete product.subCategory;
+    delete product.sectionList;
+    delete product.supplierList;
+
+    console.log(url);
     console.log(product);
-    this.props.dispatch(updateProduct(product));
+
+    this.props.dispatch(updateProduct(url,product));
   }
 
-  _onChange (event) {
+  _onInputChange (event) {
     let product = this.state.product;
     product[event.target.getAttribute('name')] = event.target.value;
     this.setState({product: product});
   }
 
-  _onChangeAddress (event) {
-    let product = this.state.product;
-    product.address[event.target.getAttribute('name')] = event.target.value;
-    this.setState({product: product});
+  _cFilter (event) {  //Category Filter
+    let {category} = this.state;
+    category = event.value;
+    //Set subcategory items for the selected category
+    const {categories} = this.props.category;
+    let i = categories.findIndex(c=> c.name === category);
+    const subCategories = categories[i].subCategoryList.map(sc => sc.name);
+    this.setState({category: category, subCategories: subCategories, subCategory: 'Select Sub Category'});
   }
 
-  _sTypeFilter (event) {
-    let {product} = this.state;
-    product.productType = event.value;
-    this.setState({product: product});
+  _scFilter (event) { //Sub Category Filter
+    let {subCategory} = this.state;
+    subCategory = event.value;
+    this.setState({subCategory: subCategory});
   }
 
-  _onClose (event) {
-    this.props.dispatch({type: c.SUPPLIER_EDIT_FORM_TOGGLE, payload: {editing: false, product: {}}});
+  _onClose (event) {  //Main form close
+    this.props.dispatch({type: c.SUPPLIER_ADD_FORM_TOGGLE, payload: {adding: false}});
   }
 
+  _onLayerSubmit (event) {
+    event.preventDefault();
+    let {layer} = this.state;
+    const {section: {sections}, supplier: {suppliers}} = this.props;
+
+    if (! layer.section.filterValue.includes('Select')) {   
+      layer.section.filterItems = layer.section.filterItems.filter(s => s != layer.section.filterValue);
+      layer.section.selectedItems = sections.filter(s => !layer.section.filterItems.includes(s.name));
+    }
+    if (! layer.supplier.filterValue.includes('Select')) {
+      layer.supplier.filterItems = layer.supplier.filterItems.filter(s => s != layer.supplier.filterValue);
+      layer.supplier.selectedItems = suppliers.filter(s => !layer.supplier.filterItems.includes(s.name));
+    }
+
+    layer.section.filterValue = 'Select Section';
+    layer.supplier.filterValue = 'Select Supplier';
+    layer.name = '';
+    this.setState({layer: layer});
+  }
+
+  _onLayerClose () {
+    let {layer} = this.state;
+    layer.name = '';
+    layer.section.filterValue = 'Select Section';
+    layer.supplier.filterValue = 'Select Supplier';
+    this.setState({layer: layer});
+  }
+
+  _onLayerSelect (name,event) {
+    let {layer} = this.state;
+    layer[name].filterValue = event.value;
+    this.setState({layer: layer});
+  }
+
+  _onLayerSearch () {
+    console.log('_onLayerSearch');
+  }
+
+  _onRemove (name,index,event) {
+    let {layer} = this.state;
+    let rItem = layer[name].selectedItems[index];
+    layer[name].selectedItems = layer[name].selectedItems.filter(s => s.id != rItem.id);
+    layer[name].filterItems.push(rItem.name);
+    this.setState({layer: layer});
+  }
+
+  _onAdd (name,event) {   // On Section/Supplier Add Click. Show corresponding layer for adding.
+    console.log('_onAdd');
+    let {layer} = this.state;
+    layer.name = name;
+    layer.adding = true;
+    this.setState({layer: layer});
+  }
+
+  _renderLayer (name) {
+    const {layer} = this.state;
+
+    let result;
+    if (name !== '') {
+      result = (
+        <Layer align="right" closer={true} onClose={this._onLayerClose.bind(this)}
+          a11yTitle={layer[name].title}>
+          
+          <Form onSubmit={this._onLayerSubmit.bind(this)} compact={false}>
+            <Header>
+              <Heading tag="h2" margin='none'>{layer[name].title}</Heading>
+            </Header>
+            <Box pad={{vertical: 'medium'}}/>
+            <FormFields>
+              <fieldset>
+                <FormField htmlFor="name" label={layer[name].label} error=''>
+                  <Select id="name" name="name"
+                    value={layer[name].filterValue}
+                    options={layer[name].filterItems}
+                    onChange={this._onLayerSelect.bind(this,name)}
+                    onSearch={this._onLayerSearch.bind(this,name)} />
+                </FormField>
+              </fieldset>
+            </FormFields>
+            <Footer pad={{vertical: 'medium'}}>
+              <Button type="submit" primary={true} label="OK"
+                onClick={this._onLayerSubmit.bind(this)} />
+            </Footer>
+          </Form>
+        </Layer>
+      );
+    }
+    return result;
+  }
+
+  _renderFields (name) {
+    const {layer} = this.state;
+    let selected = layer[name].selectedItems;
+
+    const selectedFields = selected.map((s, index) => {
+      return (
+        <ListItem key={index} justify="between" pad="none"
+          separator={index === 0 ? 'horizontal' : 'bottom'}
+          responsive={false}>
+          <span>{s.name}</span>
+          <Button icon={<TrashIcon />}
+            onClick={this._onRemove.bind(this,name,index)}
+            a11yTitle={`Remove Section`} />
+        </ListItem>
+      );
+    });
+
+    return (
+      <fieldset>
+        <Header size="small" justify="between">
+          <Heading tag="h3">{layer[name].label}</Heading>
+          <Button icon={<AddIcon />} onClick={this._onAdd.bind(this,name)}
+            a11yTitle={layer[name].title} />
+        </Header>
+        <List>
+          {selectedFields}
+        </List>
+      </fieldset>
+    );
+  }
 
   render () {
-    const {product,errors} = this.state;
+    const {product,errors,layer} = this.state;
+
+    const layerControl = this._renderLayer(layer.name);
+
+    const sectionFields = this._renderFields('section');
+    const supplierFields = this._renderFields('supplier');
 
     return (
       <Box>
@@ -100,41 +272,63 @@ class ProductEdit extends Component {
               <FormFields>
 
                 <fieldset>
+
                   <FormField label="Product Name" error={errors[0]}>
-                    <input type="text" name="name" value={product.name} onChange={this._onChange.bind(this)} />
+                    <input type="text" name="name" value={product.name} onChange={this._onInputChange.bind(this)} />
                   </FormField>
-                  <FormField label="Contact Person" error={errors[0]}>
-                    <input type="text" name="contactPerson" value={product.contactPerson} onChange={this._onChange.bind(this)} />
+                  <FormField label="Product Description" error={errors[0]}>
+                    <input type="text" name="description" value={product.description} onChange={this._onInputChange.bind(this)} />
                   </FormField>
-                  <FormField label="Product Type" htmlFor="sType" error={errors[0]}>
-                    <Select id="sType" name="sType" options={['LOCAL','NON_LOCAL']}
-                      value={product.productType}  onChange={this._sTypeFilter.bind(this)} />
+                  <FormField label="Item Code" error={errors[0]}>
+                    <input type="text" name="itemCode" value={product.itemCode} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Price" error={errors[0]}>
+                    <input type="text" name="price" value={product.price} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Minimum Order Quantity" error={errors[0]}>
+                    <input type="text" name="minOrderQty" value={product.minOrderQty} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Packet Size" error={errors[0]}>
+                    <input type="text" name="packetSize" value={product.packetSize} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  
+                </fieldset>
+
+                <fieldset>
+                  <Box direction="row" justify="between">
+                    <Heading tag="h3">Lead Times</Heading>
+                  </Box>
+                  <FormField label="Ordering time" error={errors[0]}>
+                    <input type="text" name="timeOrdering" value={product.timeOrdering} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Procurement Time" error={errors[0]}>
+                    <input type="text" name="timeProcurement" value={product.timeProcurement} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Transportation Time" error={errors[0]}>
+                    <input type="text" name="timeTransporation" value={product.timeTransporation} onChange={this._onInputChange.bind(this)} />
+                  </FormField>
+                  <FormField label="Buffer Time" error={errors[0]}>
+                    <input type="text" name="timeBuffer" value={product.timeBuffer} onChange={this._onInputChange.bind(this)} />
                   </FormField>
                 </fieldset>
 
                 <fieldset>
                   <Box direction="row" justify="between">
-                    <Heading tag="h3">Address</Heading>
+                    <Heading tag="h3">Units of Measurement</Heading>
                   </Box>
-                  <FormField label="Street" error={errors[0]}>
-                    <input type="text" name="street" value={product.address.street} onChange={this._onChangeAddress.bind(this)} />
+                  <FormField label="Purchase" error={errors[0]}>
+                    <input type="text" name="uomPurchase" value={product.uomPurchase} onChange={this._onInputChange.bind(this)} />
                   </FormField>
-                  <FormField label="Landmark" error={errors[0]}>
-                    <input type="text" name="landmark" value={product.address.landmark} onChange={this._onChangeAddress.bind(this)} />
+                  <FormField label="Consumption" error={errors[0]}>
+                    <input type="text" name="uomConsumption" value={product.uomConsumption} onChange={this._onInputChange.bind(this)} />
                   </FormField>
-                  <FormField label="City" error={errors[0]}>
-                    <input type="text" name="city" value={product.address.city} onChange={this._onChangeAddress.bind(this)} />
-                  </FormField>
-                  <FormField label="State" error={errors[0]}>
-                    <input type="text" name="state" value={product.address.state} onChange={this._onChangeAddress.bind(this)} />
-                  </FormField>
-                  <FormField label="Country" error={errors[0]}>
-                    <input type="text" name="country" value={product.address.country} onChange={this._onChangeAddress.bind(this)} />
-                  </FormField>
-                  <FormField label="Pin" error={errors[0]}>
-                    <input type="text" name="zip" value={product.address.zip} onChange={this._onChangeAddress.bind(this)} />
+                  <FormField label="Conversion Factor" error={errors[0]}>
+                    <input type="text" name="conversionFactor" value={product.conversionFactor} onChange={this._onInputChange.bind(this)} />
                   </FormField>
                 </fieldset>
+
+                {sectionFields}
+                {supplierFields}
 
               </FormFields>
 
@@ -145,7 +339,7 @@ class ProductEdit extends Component {
               </Footer>
             </Form>
           </Article>
-
+          {layerControl}
         </Section>
       </Box>
       
@@ -158,7 +352,24 @@ ProductEdit.contextTypes = {
 };
 
 let select = (store) => {
-  return {product: store.product};
+  return {category: store.category, section: store.section, supplier: store.supplier};
 };
 
 export default connect(select)(ProductEdit);
+
+/*result = (
+  <LayerForm compact={true} align="top" title={layer[name].title} submitLabel="OK"
+    onClose={this._onLayerClose.bind(this)} onSubmit={this._onLayerSubmit.bind(this)}
+    secondaryControl={removeControl}>
+    <fieldset>
+      <FormField htmlFor="name" label={layer[name].label} error=''>
+        <Select id="name" name="name"
+          value={layer[name].filterValue}
+          options={layer[name].filterItems}
+          onChange={this._onLayerSelect.bind(this,name)}
+          onSearch={this._onLayerSearch.bind(this,name)} />
+      </FormField>
+    </fieldset>
+  </LayerForm>
+);*/
+

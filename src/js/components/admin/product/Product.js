@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 import {getCategories} from '../../../actions/category';
 import {removeProduct}  from '../../../actions/product';
-import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
+import {PRODUCT_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
 import Add from "grommet/components/icons/base/Add";
@@ -128,7 +128,7 @@ class Product extends Component {
 
   _onAddClick () {
     console.log('_onAddClick');
-    this.props.dispatch({type: c.SUPPLIER_ADD_FORM_TOGGLE,payload: {adding: true}});
+    this.props.dispatch({type: c.PRODUCT_ADD_FORM_TOGGLE,payload: {adding: true}});
   }
 
   _onUploadClick () {
@@ -145,7 +145,7 @@ class Product extends Component {
   _onEditClick (index) {
     console.log('_onEditClick');
     const {products} = this.state;
-    this.props.dispatch({type: c.SUPPLIER_EDIT_FORM_TOGGLE, payload:{editing: true,product: products[index]}});
+    this.props.dispatch({type: c.PRODUCT_EDIT_FORM_TOGGLE, payload:{editing: true, product: products[index]}});
     this.context.router.push('/product/edit');
   }
 

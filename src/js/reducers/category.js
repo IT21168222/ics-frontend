@@ -6,6 +6,7 @@ const initialState = {
   adding: false,
   editing: false,
   categories:[],
+  product: {},  //Product being edited
   filter: {},
   sort: 'category:asc',
   toggleStatus: true
@@ -86,27 +87,23 @@ const handlers = {
     return ({adding: false, toggleStatus: !_.toggleStatus, categories: categories});
   },
   [p.PRODUCT_ADD_FAIL]: (_, action) => ({adding: false}),
-  [p.PRODUCT_EDIT_FORM_TOGGLE]: (_, action) => ({editing: action.payload.editing}),
+  [p.PRODUCT_EDIT_FORM_TOGGLE]: (_, action) => ({editing: action.payload.editing, product: action.payload.product}),
   [p.PRODUCT_EDIT_SUCCESS]: (_, action) => {
     const product = action.payload.product;
-    //console.log(product);
     let categories = _.categories;
-    let i = categories.findIndex(c=> c._links.self.href === product._links.category.href);
-    let category = categories[i];
-    //console.log(category.productList);
-    let j = category.productList.findIndex(p => p.id === product.id);
-    category.productList[j] = product;
-    categories[i] = category;
+    const i = categories.findIndex(c=> c.id === product.category.id);
+    const j = categories[i].subCategoryList.findIndex(sc=> sc.id === product.subCategory.id);
+    const k = categories[i].subCategoryList[j].productList.findIndex(p=> p.id === product.id);
+    categories[i].subCategoryList[j].productList[k] = product;
     return ({editing: false,toggleStatus: !_.toggleStatus, categories: categories});
   },
   [p.PRODUCT_EDIT_FAIL]: (_, action) => ({editing: false}),
   [p.PRODUCT_REMOVE_SUCCESS]: (_, action) => {
     const product = action.payload.product;
     let categories = _.categories;
-    let i = categories.findIndex(c=> c._links.self.href === product._links.category.href);
-    let category = categories[i];
-    category.productList = category.productList.filter(p => p.id != product.id);
-    categories[i] = category;
+    const i = categories.findIndex(c=> c.id === product.category.id);
+    const j = categories[i].subCategoryList.findIndex(sc=> sc.id === product.subCategory.id);
+    categories[i].subCategoryList[j].productList = categories[i].subCategoryList[j].productList.filter(p => p.id != product.id);
     return ({toggleStatus: !_.toggleStatus,categories: categories});
   }
 };
