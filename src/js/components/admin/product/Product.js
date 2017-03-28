@@ -13,6 +13,7 @@ import Button from 'grommet/components/Button';
 import Edit from "grommet/components/icons/base/Edit";
 import FilterControl from 'grommet-addons/components/FilterControl';
 import Header from 'grommet/components/Header';
+import HelpIcon from 'grommet/components/icons/base/Help';
 import Search from 'grommet/components/Search';
 import Section from 'grommet/components/Section';
 import Spinning from 'grommet/components/icons/Spinning';
@@ -24,6 +25,7 @@ import Trash from "grommet/components/icons/base/Trash";
 //import Tiles from 'grommet/components/Tiles';
 import Title from 'grommet/components/Title';
 //import ProductTile from './ProductTile';
+import UploadIcon from 'grommet/components/icons/base/Upload';
 
 class Product extends Component {
   
@@ -129,6 +131,10 @@ class Product extends Component {
     this.props.dispatch({type: c.SUPPLIER_ADD_FORM_TOGGLE,payload: {adding: true}});
   }
 
+  _onUploadClick () {
+    console.log('_onUploadClick');
+  }
+
   _onRemoveClick (index) {
     console.log('_onRemoveClick');
     const {products} = this.state;
@@ -208,6 +214,8 @@ class Product extends Component {
       );
     }*/
     let addControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
+    let uploadControl = (<Anchor icon={<UploadIcon />} path='/product/upload' a11yTitle={`Upload Product`} onClick={this._onUploadClick.bind(this)}/>);
+    let helpControl = (<Anchor icon={<HelpIcon />} path='/product/help' a11yTitle={`Help`} onClick={this._onUploadClick.bind(this)}/>);
     //let editControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
 
 
@@ -221,10 +229,12 @@ class Product extends Component {
           </Title>
           <Search inline={true} fill={true} size='medium' placeHolder='Search'
             value={searchText} onDOMChange={this._onSearch.bind(this)} />
+          {uploadControl}
           {addControl}
           <FilterControl filteredTotal={filteredCount}
             unfilteredTotal={unfilteredCount}
             onClick={this._onFilterActivate.bind(this)} />
+            {helpControl}
         </Header>
 
         <Section direction="column" pad={{vertical: 'large', horizontal:'small'}}>
@@ -234,7 +244,7 @@ class Product extends Component {
               {items}
             </Tiles>*/}
 
-            <Table responsive={false} scrollable={true}>
+            <Table scrollable={true}>
               <TableHeader labels={['Id','ItemCode','Product Name','Category','Sub Category','Section','Supplier', 'Price', 'Class Type','ACTION']} />
               
               <tbody>{items}</tbody>

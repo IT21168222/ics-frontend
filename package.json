@@ -12,6 +12,7 @@
     "axios": "^0.15.3",
     "grommet": "1.2.1",
     "grommet-addons": "^0.1.0",
+    "grommet-templates": "^0.2.0",
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
     "react-dropzone": "^3.7.3",
