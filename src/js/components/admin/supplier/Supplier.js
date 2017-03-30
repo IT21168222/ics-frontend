@@ -13,6 +13,7 @@ import Button from 'grommet/components/Button';
 import Edit from "grommet/components/icons/base/Edit";
 import FilterControl from 'grommet-addons/components/FilterControl';
 import Header from 'grommet/components/Header';
+import HelpIcon from 'grommet/components/icons/base/Help';
 import Search from 'grommet/components/Search';
 import Section from 'grommet/components/Section';
 import Spinning from 'grommet/components/icons/Spinning';
@@ -122,6 +123,10 @@ class Supplier extends Component {
     this.context.router.push('/supplier/edit');
   }
 
+  _onHelpClick () {
+    window.open("http://localhost:8080/help/supplier");
+  }
+
   render() {
     const {fetching} = this.props.supplier;
     const { suppliers, searchText, filterActive,filteredCount,unfilteredCount } = this.state;
@@ -177,6 +182,7 @@ class Supplier extends Component {
           <FilterControl filteredTotal={filteredCount}
             unfilteredTotal={unfilteredCount}
             onClick={this._onFilterActivate.bind(this)} />
+          <Button icon={<HelpIcon />} onClick={this._onHelpClick.bind(this)}/>
         </Header>
 
         <Section direction="column" pad={{vertical: 'large', horizontal:'small'}}>

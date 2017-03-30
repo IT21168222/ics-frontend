@@ -17,6 +17,7 @@ import FormField from 'grommet/components/FormField';
 import FormFields from 'grommet/components/FormFields';
 import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
+import HelpIcon from 'grommet/components/icons/base/Help';
 import Layer from 'grommet/components/Layer';
 import List from 'grommet/components/List';
 import ListItem from 'grommet/components/ListItem';
@@ -76,6 +77,10 @@ class Category extends Component {
     console.log('_onEditClick: index = ' + index);
     this.setState({category: this.props.category.categories[index]});
     this.props.dispatch({type: c.CATEGORY_EDIT_FORM_TOGGLE, payload: {editing: true}});
+  }
+
+  _onHelpClick () {
+    window.open("http://localhost:8080/help/category");
   }
 
   _onCloseLayer (layer) {
@@ -151,6 +156,7 @@ class Category extends Component {
           <Search inline={true} fill={true} size='medium' placeHolder='Search'
             value={searchText} onDOMChange={this._onSearch.bind(this)} />
           <Button icon={<Add />} onClick={this._onAddClick.bind(this)}/>
+          <Button icon={<HelpIcon />} onClick={this._onHelpClick.bind(this)}/>
         </Header>
         <Section direction="column" pad={{vertical: 'large', horizontal:'small'}}>
           <Box size="xsmall" alignSelf="center" pad={{horizontal:'medium'}} >{loading}</Box>

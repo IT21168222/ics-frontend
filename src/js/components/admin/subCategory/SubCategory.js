@@ -18,6 +18,7 @@ import FormField from 'grommet/components/FormField';
 import FormFields from 'grommet/components/FormFields';
 import Header from 'grommet/components/Header';
 import Heading from 'grommet/components/Heading';
+import HelpIcon from 'grommet/components/icons/base/Help';
 import Layer from 'grommet/components/Layer';
 import Search from 'grommet/components/Search';
 import Section from 'grommet/components/Section';
@@ -166,6 +167,10 @@ class SubCategory extends Component {
     this.props.dispatch({type: c.SUB_CATEGORY_EDIT_FORM_TOGGLE, payload:{editing: true}});
   }
 
+  _onHelpClick () {
+    window.open("http://localhost:8080/help/subCategory");
+  }
+
   _onCloseLayer (layer) {
     console.log('_onCloseLayer');
     if ( layer == 'add') {
@@ -249,6 +254,7 @@ class SubCategory extends Component {
           <FilterControl filteredTotal={filteredCount}
             unfilteredTotal={unfilteredCount}
             onClick={this._onFilterActivate.bind(this)} />
+          <Button icon={<HelpIcon />} onClick={this._onHelpClick.bind(this)}/>
         </Header>
 
         <Section direction="column" pad={{vertical: 'large', horizontal:'small'}}>

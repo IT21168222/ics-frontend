@@ -149,6 +149,10 @@ class Product extends Component {
     this.context.router.push('/product/edit');
   }
 
+  _onHelpClick () {
+    window.open("http://localhost:8080/help/product");
+  }
+
   /*_renderProducts (products) {
     const items = products.map((p, index)=>{
       let sections = '  ';
@@ -215,7 +219,7 @@ class Product extends Component {
     }*/
     let addControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
     let uploadControl = (<Anchor icon={<UploadIcon />} path='/product/upload' a11yTitle={`Upload Product`} onClick={this._onUploadClick.bind(this)}/>);
-    let helpControl = (<Anchor icon={<HelpIcon />} path='/product/help' a11yTitle={`Help`} onClick={this._onUploadClick.bind(this)}/>);
+    let helpControl = (<Button icon={<HelpIcon />}  onClick={this._onHelpClick.bind(this)}/>);
     //let editControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
 
 
