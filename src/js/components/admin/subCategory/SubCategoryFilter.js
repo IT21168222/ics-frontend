@@ -97,7 +97,7 @@ class SubCategoryFilter extends Component {
 }
 
 let select = (store) => {
-  return { category: store.category};
+  return { category: store.category, misc: store.misc};
 };
 
 export default connect(select)(SubCategoryFilter);

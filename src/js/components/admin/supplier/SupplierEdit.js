@@ -26,6 +26,7 @@ class SupplierEdit extends Component {
     super();
 
     this.state = {
+      initializing: false,
       supplier: null,
       errors: []
     };
@@ -35,6 +36,9 @@ class SupplierEdit extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
+    if (!this.props.misc.initialized) {
+      this.context.router.push('/supplier');
+    }
     let {supplier} = this.props.supplier;
     if ( supplier.address == null) {
       supplier.address = {};
@@ -158,7 +162,7 @@ SupplierEdit.contextTypes = {
 };
 
 let select = (store) => {
-  return {supplier: store.supplier};
+  return {supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(SupplierEdit);

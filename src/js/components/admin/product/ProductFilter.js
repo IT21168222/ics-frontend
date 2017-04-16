@@ -19,33 +19,66 @@ class ProductFilter extends Component {
   constructor () {
     super();
     this.state = {
-      category: []
+      category: [],
+      subCategory: [],
+      section: [],
+      supplier: [],
+      classType: []
     };
   }
 
   componentWillMount () {
-    let list = [];
-    list.push({label: 'All', value: undefined});
-    this.props.category.categories.forEach(c => list.push({label: c.name, value: c.name}));
-    this.setState({category: list});
+    const {category: {categories}/*, section: {sections}*/} = this.props;
+    let category = []/*, subCategory = [], section = []*/;
+    let classType = [
+      {label: 'All', value: undefined},
+      {label: 'CLASS_A', value: 'CLASS_A'},
+      {label: 'CLASS_B', value: 'CLASS_B'},
+      {label: 'CLASS_C', value: 'CLASS_C'}
+    ];
+
+    category.push({label: 'All', value: undefined});
+    categories.forEach(c => category.push({label: c.name, value: c.name}));
+
+    // subCategory.push({label: 'All', value: undefined});
+    // filter.subCategory.push('All');
+    // categories.forEach(c => {
+    //   c.subCategoryList.forEach(sc => {
+    //     subCategory.push({label: sc.name, value: sc.name});
+    //   });
+    // });
+
+    // section.push({label: 'All', value: undefined});
+    // filter.section.push('All');
+    // sections.forEach(s => section.push({label: s.name, value: s.name}));
+
+    // this.setState({category, subCategory, section, classType});
+    this.setState({category, classType});
   }
 
   _onChange (name,event) {
     let filter = this.props.category.filter;
+    console.log(filter);
 
     if (!event.option.value) {
       // user selected the 'All' option, which has no value, clear filter
       delete filter[name];
+      // if (name == 'subCategory' || name == 'section') {
+      //   filter[name] = ['All'];
+      // }
     } else {
       // we get the new option passed back as an object,
       // normalize it to just a value
       let selectedFilter = event.value.map(value => (
         typeof value === 'object' ? value.value : value)
       );
-      console.log(selectedFilter);
+      //console.log(selectedFilter);
       filter[name] = selectedFilter;
       if (filter[name].length === 0) {
         delete filter[name];
+        // if (name == 'subCategory' || name == 'section') {
+        //   filter[name] = ['All'];
+        // }
       }
     }
     this.props.dispatch({type:c.CATEGORY_FILTER, payload: {filter: filter}});
@@ -74,17 +107,34 @@ class ProductFilter extends Component {
               <Button icon={<CloseIcon />} plain={true}
                 onClick={this.props.onClose} />
             </Header>
+            
+            <Section pad={{ horizontal: 'large', vertical: 'small' }}>
+              <Heading tag='h3'>Class</Heading>
+              <Select inline={true}  multiple={true} options={this.state.classType} value={filter.class} onChange={this._onChange.bind(this,'class')} />
+            </Section>
             <Section pad={{ horizontal: 'large', vertical: 'small' }}>
               <Heading tag='h3'>Category</Heading>
               <Select inline={true} multiple={true} options={this.state.category} value={filter.category} onChange={this._onChange.bind(this,'category')} />
             </Section>
+            {/*<Section pad={{ horizontal: 'large', vertical: 'small' }}>
+              <Heading tag='h3'>Sub Category</Heading>
+              <Select  multiple={true} options={this.state.subCategory} value={filter.subCategory} onChange={this._onChange.bind(this,'subCategory')} />
+            </Section>
+            <Section pad={{ horizontal: 'large', vertical: 'small' }}>
+              <Heading tag='h3'>Section</Heading>
+              <Select  multiple={true} options={this.state.section} value={filter.section} onChange={this._onChange.bind(this,'section')} />
+            </Section>
+            <Section pad={{ horizontal: 'large', vertical: 'small' }}>
+              <Heading tag='h3'>Supplier</Heading>
+              <Select inline={true} multiple={true} options={this.state.suppliers} value={filter.supplier} onChange={this._onChange.bind(this,'supplier')} />
+            </Section>*/}
             <Section pad={{ horizontal: 'large', vertical: 'small' }}>
               <Heading tag='h2'>Sort</Heading>
               <Sort options={[
                 { label: 'Product Name', value: 'name', direction: 'asc' }
               ]} value={sortProperty} direction={sortDirection}
               onChange={this._onChangeSort.bind(this)} />
-            </Section>
+            </Section> 
           </div>
         </Sidebar>
       </Layer>
@@ -93,7 +143,7 @@ class ProductFilter extends Component {
 }
 
 let select = (store) => {
-  return { category: store.category};
+  return { category: store.category, section: store.section, supplier: store.supplier};
 };
 
 export default connect(select)(ProductFilter);

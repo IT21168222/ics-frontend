@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
-
+import {initialize}  from '../../../actions/misc';
 import * as userAction  from '../../../actions/user';
 import * as c  from '../../../utils/constants';
 
@@ -33,6 +34,7 @@ class User extends Component {
   constructor () {
     super();
     this.state = {
+      initializing: false,
       fetching: false,
       adding: false,
       viewing: false,
@@ -51,7 +53,16 @@ class User extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    this.getUsers();
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+    }
   }
 
   _onChangeInput ( event ) {
@@ -101,7 +112,18 @@ class User extends Component {
   }
 
   render() {
-    let { fetching, adding, viewing, editing, users, user, errors, roles } = this.state;
+    let { fetching, adding, viewing, editing, users, user, errors, roles,initializing } = this.state;
+    
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
+
     const loading = fetching ? (<Spinning />) : null;
     const userItems = users.map((user, index)=>{
       return (
@@ -225,4 +247,13 @@ class User extends Component {
   }
 }
 
-export default User;
+
+User.contextTypes = {
+  router: React.PropTypes.object.isRequired
+};
+
+let select = (store) => {
+  return { user: store.user, misc: store.misc};
+};
+
+export default connect(select)(User);

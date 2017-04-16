@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 import {addSupplier}  from '../../../actions/supplier';
+import {initialize}  from '../../../actions/misc';
 import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
@@ -18,6 +19,7 @@ import Select from 'grommet/components/Select';
 import Button from 'grommet/components/Button';
 import CloseIcon from 'grommet/components/icons/base/Close';
 import Anchor from 'grommet/components/Anchor';
+import Spinning from 'grommet/components/icons/Spinning';
 
 
 class SupplierAdd extends Component {
@@ -26,6 +28,7 @@ class SupplierAdd extends Component {
     super();
 
     this.state = {
+      initializing: false,
       supplier: {
         address: {}
       },
@@ -36,12 +39,19 @@ class SupplierAdd extends Component {
   }
 
   componentWillMount () {
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
     let {supplier} = this.state;
     supplier.supplierType = 'LOCAL';
     this.setState({supplier: supplier});
   }
 
   componentWillReceiveProps (nextProps) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+    }
     if (!nextProps.supplier.adding) {
       this.context.router.push('/supplier');
     }
@@ -81,7 +91,16 @@ class SupplierAdd extends Component {
 
 
   render () {
-    const {supplier,errors} = this.state;
+    const {supplier,errors, initializing} = this.state;
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     return (
       <Box>
@@ -156,7 +175,7 @@ SupplierAdd.contextTypes = {
 };
 
 let select = (store) => {
-  return {supplier: store.supplier};
+  return {supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(SupplierAdd);

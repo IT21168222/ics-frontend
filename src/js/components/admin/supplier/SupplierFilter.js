@@ -96,7 +96,7 @@ class SupplierFilter extends Component {
 }
 
 let select = (store) => {
-  return { supplier: store.supplier};
+  return { supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(SupplierFilter);

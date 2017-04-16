@@ -1,13 +1,22 @@
 import axios from "axios";
-
+import {getHeaders} from  '../utils/restUtil';
 import {SUB_CATEGORY_CONSTANTS as c} from  '../utils/constants';
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status == 401) {
+    sessionStorage.session = false;
+  }
+  return Promise.reject(error);
+});
 
 export function addSubCategory (url,subCategory) {
   console.log('addSubCategory');
 
   return function (dispatch) {
     console.log(subCategory);
-    axios.post(url, JSON.stringify(subCategory), {headers: {'Content-Type':'application/json'}})
+    axios.post(url, JSON.stringify(subCategory), {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 201) {
@@ -24,7 +33,7 @@ export function updateSubCategory (url,subCategory) {
   console.log('updateSubCategory');
   return function (dispatch) {
     console.log(subCategory);
-    axios.put(url, JSON.stringify(subCategory),{headers: {'Content-Type':'application/json'}})
+    axios.put(url, JSON.stringify(subCategory),{headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 200) {
@@ -42,7 +51,7 @@ export function removeSubCategory (subCategory) {
   return function (dispatch) {
     console.log(subCategory);
 
-    axios.delete(subCategory._links.self.href)
+    axios.delete(subCategory._links.self.href, {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       dispatch({type: c.SUB_CATEGORY_REMOVE_SUCCESS, payload: {subCategory: subCategory}});

@@ -2,7 +2,8 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 import {addProduct}  from '../../../actions/product';
-import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
+import {initialize}  from '../../../actions/misc';
+import {PRODUCT_CONSTANTS as c}  from '../../../utils/constants';
 
 import AddIcon from "grommet/components/icons/base/Add";
 import AppHeader from '../../AppHeader';
@@ -23,6 +24,7 @@ import Anchor from 'grommet/components/Anchor';
 import Layer from 'grommet/components/Layer';
 import List from 'grommet/components/List';
 import ListItem from 'grommet/components/ListItem';
+import Spinning from 'grommet/components/icons/Spinning';
 
 
 class ProductAdd extends Component {
@@ -31,6 +33,7 @@ class ProductAdd extends Component {
     super();
 
     this.state = {
+      initializing: false,
       product: {},
       categories: [],                         //category select items 
       category: 'Select Category', 
@@ -61,6 +64,11 @@ class ProductAdd extends Component {
   }
 
   componentWillMount () {
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
+
     const {section: {sections},supplier: {suppliers},category: {categories}} = this.props;
     let {layer} = this.state;
 
@@ -72,6 +80,9 @@ class ProductAdd extends Component {
   }
 
   componentWillReceiveProps (nextProps) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+    }
     if (!nextProps.category.adding) {
       this.context.router.push('/product');
     }
@@ -130,7 +141,7 @@ class ProductAdd extends Component {
   }
 
   _onClose (event) {  //Main form close
-    this.props.dispatch({type: c.SUPPLIER_ADD_FORM_TOGGLE, payload: {adding: false}});
+    this.props.dispatch({type: c.PRODUCT_ADD_FORM_TOGGLE, payload: {adding: false}});
   }
 
   _onLayerSubmit (event) {
@@ -255,7 +266,17 @@ class ProductAdd extends Component {
   }
 
   render () {
-    const {product,errors,categories,category,subCategories,subCategory,layer} = this.state;
+    const {product,errors,categories,category,subCategories,subCategory,layer,initializing} = this.state;
+
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     const layerControl = this._renderLayer(layer.name);
 
@@ -365,7 +386,7 @@ ProductAdd.contextTypes = {
 };
 
 let select = (store) => {
-  return {category: store.category, section: store.section, supplier: store.supplier};
+  return {category: store.category, section: store.section, supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(ProductAdd);

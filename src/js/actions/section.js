@@ -1,6 +1,15 @@
 import axios from "axios";
-
+import {getHeaders} from  '../utils/restUtil';
 import {SECTION_CONSTANTS as c} from  '../utils/constants';
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status == 401) {
+    sessionStorage.session = false;
+  }
+  return Promise.reject(error);
+});
 
 export function getSections () {
   console.log("getSections()");
@@ -25,7 +34,7 @@ export function addSection (section) {
 
   return function (dispatch) {
     console.log(section);
-    axios.post(window.serviceHost + '/sections', JSON.stringify(section), {headers: {'Content-Type':'application/json'}})
+    axios.post(window.serviceHost + '/sections', JSON.stringify(section), {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 201) {
@@ -42,7 +51,7 @@ export function updateSection (section) {
   console.log('updateSection');
   return function (dispatch) {
     console.log(section);
-    axios.put(section._links.self.href, JSON.stringify(section),{headers: {'Content-Type':'application/json'}})
+    axios.put(section._links.self.href, JSON.stringify(section),{headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 200) {
@@ -60,7 +69,7 @@ export function removeSection (section) {
   return function (dispatch) {
     console.log(section);
 
-    axios.delete(section._links.self.href)
+    axios.delete(section._links.self.href, {headers: getHeaders})
     .then((response) => {
       console.log(response);
       dispatch({type: c.SECTION_REMOVE_SUCCESS, payload: {section: section}});

@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
-
-import {addSection,getSections,removeSection,updateSection}  from '../../../actions/section';
+import {initialize}  from '../../../actions/misc';
+import {addSection,removeSection,updateSection}  from '../../../actions/section';
 import {SECTION_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
@@ -32,6 +32,7 @@ class Sections extends Component {
   constructor () {
     super();
     this.state = {
+      initializing: false,
       errors: [],
       section: {},
       searchText: ''
@@ -41,7 +42,16 @@ class Sections extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    this.props.dispatch(getSections());
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+    }
   }
 
   _addSection () {
@@ -95,7 +105,17 @@ class Sections extends Component {
 
   render() {
     const { fetching, adding, editing, sections } = this.props.section;
-    const { section, errors, searchText } = this.state;
+    const { section, errors, searchText,initializing } = this.state;
+
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     const loading = fetching ? (<Spinning />) : null;
     const count = fetching ? 100 : sections.length;
@@ -171,7 +191,7 @@ class Sections extends Component {
 }
 
 let select = (store) => {
-  return { section: store.section};
+  return { section: store.section, misc: store.misc};
 };
 
 export default connect(select)(Sections);

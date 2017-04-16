@@ -1,22 +1,39 @@
 import {CATEGORY_CONSTANTS as c, SUB_CATEGORY_CONSTANTS as sc, PRODUCT_CONSTANTS as p} from "../utils/constants";
 
 const initialState = {
-  loaded: false,
   fetching: false,
   adding: false,
   editing: false,
+  uploading: false,
+  refreshing: false,
   categories:[],
+  products:[],
   product: {},  //Product being edited
-  filter: {},
+  filter: {
+    subCategory: [],
+    section: []
+  },
   sort: 'category:asc',
   toggleStatus: true
 };
 
 const handlers = {
-//////////////////////////////////////// Category //////////////////////////////////////////  
-  [c.CATEGORY_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
-  [c.CATEGORY_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, categories: action.payload.categories}),
-  [c.CATEGORY_FETCH_FAIL]: (_, action) => ({fetching: false}),
+//////////////////////////////////////// Category ////////////////////////////////////////// 
+  [c.INITIALIZE_CATEGORY]: (_, action) => {
+    const categories = action.payload.categories;
+    let products = [] ;
+    categories.forEach(c => {
+      c.subCategoryList.forEach(sc => {
+        sc.productList.forEach(p => {
+          products.push({...p, subCategory: sc, category: c});
+        });
+      });
+    });
+    return ({categories, products, toggleStatus: !_.toggleStatus});
+  },
+  // [c.CATEGORY_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
+  // [c.CATEGORY_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, categories: action.payload.categories}),
+  // [c.CATEGORY_FETCH_FAIL]: (_, action) => ({fetching: false}),
   [c.CATEGORY_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
   [c.CATEGORY_ADD_SUCCESS]: (_, action) => {
     let categories = _.categories;
@@ -78,6 +95,8 @@ const handlers = {
   [p.PRODUCT_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
   [p.PRODUCT_ADD_SUCCESS]: (_, action) => {
     const product = action.payload.product;
+    let products = _.products;
+    products.push(product);
     let categories = _.categories;
     const i = categories.findIndex(c=> c.id === product.category.id);
     const j = categories[i].subCategoryList.findIndex(sc=> sc.id === product.subCategory.id);
@@ -87,6 +106,12 @@ const handlers = {
     return ({adding: false, toggleStatus: !_.toggleStatus, categories: categories});
   },
   [p.PRODUCT_ADD_FAIL]: (_, action) => ({adding: false}),
+  [p.PRODUCT_SYNC_PROGRESS]: (_, action) => ({refreshing: true}),
+  [p.PRODUCT_SYNC_SUCCESS]: (_, action) => ({refreshing: false}),
+  [p.PRODUCT_UPLOAD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.uploading}),
+  [p.PRODUCT_UPLOAD_SUCCESS]: (_, action) => ({uploading: false}),
+  [p.PRODUCT_UPLOAD_PROGRESS]: (_, action) => ({uploading: true}),
+  [p.PRODUCT_UPLAOD_FAIL]: (_, action) => ({uploading: false}),
   [p.PRODUCT_EDIT_FORM_TOGGLE]: (_, action) => ({editing: action.payload.editing, product: action.payload.product}),
   [p.PRODUCT_EDIT_SUCCESS]: (_, action) => {
     const product = action.payload.product;

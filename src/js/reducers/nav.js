@@ -1,9 +1,9 @@
-import { NAV_ACTIVATE } from "../actions";
+import { NAV_ACTIVATE } from "../utils/constants";
 
 const initialState = {
   active: false,
   itemsAdmin:[
-    { path: '/', label: 'Home'},
+    { path: '/dashboard', label: 'Home'},
     { path: '/user', label: 'User'},
     { path: '/category', label: 'Category'},
     { path: '/subCategory', label: 'Sub Category'},
@@ -13,23 +13,23 @@ const initialState = {
     { path: '/test', label: 'Test Page'}
   ],
   itemsStore:[
-     { path: '/', label: 'Home'}
+     { path: '/dashboard', label: 'Home'}
   ],
   itemsPurchase:[
-     { path: '/', label: 'Home'}
+     { path: '/dashboard', label: 'Home'}
   ],
   itemsUser:[
-     { path: '/', label: 'Home'}
+     { path: '/dashboard', label: 'Home'}
   ]
 };
 
-export default function nav ( state = initialState, action) {
+const handlers = { 
+  [NAV_ACTIVATE]: (_, action) => ({active: action.payload.active})
 
-  switch ( action.type) {
-    case NAV_ACTIVATE : {
-      state = {...state, active: action.active};
-      break;
-    }
-  }
-  return state;
+};
+
+export default function section (state = initialState, action) {
+  let handler = handlers[action.type];
+  if( !handler ) return state;
+  return { ...state, ...handler(state, action) };
 }

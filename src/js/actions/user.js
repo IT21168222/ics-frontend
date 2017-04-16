@@ -1,12 +1,59 @@
 import axios from "axios";
+import {getHeaders} from  '../utils/restUtil';
+import { USER_CONSTANTS as u } from '../utils/constants';
 
-//import { USER_FETCH_SUCCESS } from '../utils/constants';
 
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status == 401) {
+    sessionStorage.session = false;
+  }
+  return Promise.reject(error);
+});
+
+export function authenticate (username, password) {
+  console.log('authenticate');
+
+  return function (dispatch) {
+
+    const config = {
+      method: 'post',
+      url: "http://localhost:8000/oauth/token",
+      //url: "http://zahidraza.in/andon-system/oauth/token",
+      headers: {'Authorization': 'Basic ' + btoa('client:secret')},
+      params: {
+        grant_type: 'password',
+        username: username,
+        password: password
+      }
+    };
+
+    axios(config)
+    .then((response) => {
+      if (response.status == 200) {
+        dispatch({type: u.USER_AUTH_SUCCESS, payload: {username, data: response.data}});
+      }else{
+        console.log(response);
+      }
+
+    }).catch( (err) => {
+      console.log(err);
+      dispatch({type: c.USER_AUTH_FAIL});
+    });
+  };
+  
+}
+
+export function changePassword (credential) {
+
+}
+ 
 export function getUsers () {
   console.log("getUsers()");
   this.setState({fetching: true});
 
-  axios.get(window.serviceHost + '/users')
+  axios.get(window.serviceHost + '/users', {headers: getHeaders()})
   .then((response) => {
     if (response.status == 200 && response.data._embedded) {
       this.setState({users: response.data._embedded.userDtoList});
@@ -21,35 +68,9 @@ export function getUsers () {
 export function addUser () {
   console.log('addUser');
   const { user } = this.state;
-    // let errors = [];
-    // let isError = false;
-    // console.log(buyer);
-    // if (user.name == undefined || user.name == '') {
-    //   errors[0] = 'User Name cannot be blank';
-    //   isError = true;
-    // }
-    // if (user.id == undefined || user.id == '') {
-    //   errors[1] = 'User Id  cannot be blank';
-    //   isError = true;
-    // }
-    // if (user.email == undefined || user.email == '') {
-    //   errors[2] = 'Email Id  cannot be blank';
-    //   isError = true;
-    // }
-    // if (user.mobile == undefined || user.mobile == '') {
-    //   errors[3] = 'mobile Number  cannot be blank';
-    //   isError = true;
-    // }
-    // if (role == 'MERCHANT' && buyer == 'Select buyer access') {
-    //   errors[4] = 'Select Buyer access';
-    //   isError = true;
-    // }
-    // this.setState({errors: errors});
-    // if (isError) return;
-
   console.log(user);
   this.setState({adding: true});
-  axios.post(window.serviceHost + '/users', JSON.stringify(user))
+  axios.post(window.serviceHost + '/users', JSON.stringify(user), {headers: getHeaders()})
   .then((response) => {
     console.log(response);
     this.setState({adding: false});
@@ -62,36 +83,10 @@ export function addUser () {
 
 export function updateUser () {
   console.log('updateUser');
-  const { user } = this.state;
-  // let errors = [];
-  // let isError = false;
-  // console.log(buyer);
-  // if (user.name == undefined || user.name == '') {
-  //   errors[0] = 'User Name cannot be blank';
-  //   isError = true;
-  // }
-  // if (user.id == undefined || user.id == '') {
-  //   errors[1] = 'User Id  cannot be blank';
-  //   isError = true;
-  // }
-  // if (user.email == undefined || user.email == '') {
-  //   errors[2] = 'Email Id  cannot be blank';
-  //   isError = true;
-  // }
-  // if (user.mobile == undefined || user.mobile == '') {
-  //   errors[3] = 'mobile Number  cannot be blank';
-  //   isError = true;
-  // }
-  // if (role == 'MERCHANT' && buyer == 'Select buyer access') {
-  //   errors[4] = 'Select Buyer access';
-  //   isError = true;
-  // }
-  // this.setState({errors: errors});
-  // if (isError) return;
 
   console.log(user);
   this.setState({editing: true});
-  axios.put(user._links.self.href, JSON.stringify(user),{headers: {'Content-Type':'application/json'}})
+  axios.put(user._links.self.href, JSON.stringify(user),{headers: getHeaders()})
   .then((response) => {
     console.log(response);
     this.setState({editing: false});
@@ -104,7 +99,7 @@ export function updateUser () {
 
 export function removeUser (url) {
   console.log('removeUser');
-  axios.delete(url)
+  axios.delete(url, {headers: getHeaders()})
   .then((response) => {
     console.log(response);
     getUsers.bind(this)();

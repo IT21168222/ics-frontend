@@ -13,9 +13,10 @@ const initialState = {
 };
 
 const handlers = { 
-  [c.SUPPLIER_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
-  [c.SUPPLIER_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, suppliers: action.payload.suppliers}),
-  [c.SUPPLIER_FETCH_FAIL]: (_, action) => ({fetching: false}),
+  [c.INITIALIZE_SUPPLIER]: (_, action) => ({suppliers: action.payload.suppliers, loaded: true, toggleStatus: !_.toggleStatus}),
+  // [c.SUPPLIER_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
+  // [c.SUPPLIER_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, suppliers: action.payload.suppliers}),
+  // [c.SUPPLIER_FETCH_FAIL]: (_, action) => ({fetching: false}),
   [c.SUPPLIER_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
   [c.SUPPLIER_ADD_SUCCESS]: (_, action) => {
     let suppliers = _.suppliers;

@@ -1,6 +1,15 @@
 import axios from "axios";
-
+import {getHeaders} from  '../utils/restUtil';
 import {SUPPLIER_CONSTANTS as c} from  '../utils/constants';
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status == 401) {
+    sessionStorage.session = false;
+  }
+  return Promise.reject(error);
+});
 
 export function getSuppliers () {
   console.log("getSuppliers()");
@@ -25,7 +34,7 @@ export function addSupplier (supplier) {
 
   return function (dispatch) {
     console.log(supplier);
-    axios.post(window.serviceHost + '/suppliers', JSON.stringify(supplier), {headers: {'Content-Type':'application/json'}})
+    axios.post(window.serviceHost + '/suppliers', JSON.stringify(supplier), {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 201) {
@@ -42,7 +51,7 @@ export function updateSupplier (supplier) {
   console.log('updateSupplier');
   return function (dispatch) {
     console.log(supplier);
-    axios.put(supplier._links.self.href, JSON.stringify(supplier),{headers: {'Content-Type':'application/json'}})
+    axios.put(supplier._links.self.href, JSON.stringify(supplier),{headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 200) {
@@ -60,7 +69,7 @@ export function removeSupplier (supplier) {
   return function (dispatch) {
     console.log(supplier);
 
-    axios.delete(supplier._links.self.href)
+    axios.delete(supplier._links.self.href, {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       dispatch({type: c.SUPPLIER_REMOVE_SUCCESS, payload: {supplier: supplier}});

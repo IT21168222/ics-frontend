@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 
-import {addCategory,getCategories,removeCategory,updateCategory}  from '../../../actions/category';
+import {addCategory,removeCategory,updateCategory}  from '../../../actions/category';
+import {initialize}  from '../../../actions/misc';
 import {CATEGORY_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
@@ -10,7 +11,6 @@ import Add from "grommet/components/icons/base/Add";
 import Box from 'grommet/components/Box';
 import Button from 'grommet/components/Button';
 import Edit from "grommet/components/icons/base/Edit";
-//import FilterControl from 'grommet-addons/components/FilterControl';
 import Footer from 'grommet/components/Footer';
 import Form from 'grommet/components/Form';
 import FormField from 'grommet/components/FormField';
@@ -33,6 +33,7 @@ class Category extends Component {
   constructor () {
     super();
     this.state = {
+      initializing: false,
       errors: [],
       category: {},
       searchText: ''
@@ -42,7 +43,16 @@ class Category extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    this.props.dispatch(getCategories());
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+    }
   }
 
   _addCategory () {
@@ -97,7 +107,17 @@ class Category extends Component {
 
   render() {
     const { fetching, adding, editing, categories } = this.props.category;
-    const { category, errors, searchText } = this.state;
+    const { category, errors, searchText, initializing } = this.state;
+
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     const loading = fetching ? (<Spinning />) : null;
     const count = fetching ? 100 : categories.length;
@@ -173,7 +193,7 @@ class Category extends Component {
 }
 
 let select = (store) => {
-  return { category: store.category};
+  return { category: store.category, misc: store.misc};
 };
 
 export default connect(select)(Category);

@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
-
-import {getSuppliers,removeSupplier}  from '../../../actions/supplier';
+import {initialize}  from '../../../actions/misc';
+import {removeSupplier}  from '../../../actions/supplier';
 import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
@@ -19,6 +19,7 @@ import Section from 'grommet/components/Section';
 import Spinning from 'grommet/components/icons/Spinning';
 import SupplierFilter from './SupplierFilter';
 import Table from 'grommet/components/Table';
+import TableHeader from 'grommet/components/TableHeader';
 import TableRow from 'grommet/components/TableRow';
 import Trash from "grommet/components/icons/base/Trash";
 import Title from 'grommet/components/Title';
@@ -28,6 +29,7 @@ class Supplier extends Component {
   constructor () {
     super();
     this.state = {
+      initializing: false,
       errors: [],
       suppliers: [],
       supplier: {},
@@ -43,8 +45,9 @@ class Supplier extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    if (!this.props.supplier.loaded) {
-      this.props.dispatch(getSuppliers());
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
     } else {
       const {suppliers,filter,sort} = this.props.supplier;
       this._loadSupplier(suppliers,filter,sort);
@@ -53,9 +56,10 @@ class Supplier extends Component {
 
   componentWillReceiveProps (nextProps) {
     console.log('componentWillReceiveProps');
-    if (this.props.supplier.toggleStatus != nextProps.supplier.toggleStatus) {
+    if ( (this.props.supplier.toggleStatus != nextProps.supplier.toggleStatus) || (!this.props.misc.initialized && nextProps.misc.initialized) ) {
       const {suppliers,filter,sort} = nextProps.supplier;
       this._loadSupplier(suppliers,filter,sort);
+      this.setState({initializing: false});
     }
   }
 
@@ -129,7 +133,17 @@ class Supplier extends Component {
 
   render() {
     const {fetching} = this.props.supplier;
-    const { suppliers, searchText, filterActive,filteredCount,unfilteredCount } = this.state;
+    const { suppliers, searchText, filterActive,filteredCount,unfilteredCount,initializing } = this.state;
+
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     const loading = fetching ? (<Spinning />) : null;
 
@@ -189,15 +203,8 @@ class Supplier extends Component {
           <Box size="xsmall" alignSelf="center" pad={{horizontal:'medium'}}>{loading}</Box>
           <Box >
             <Table>
-              <thead>
-                <tr>
-                  <th>Supplier</th>
-                  <th>Contact Person</th>
-                  <th>Supplier Type</th>
-                  <th>Address</th>
-                  <th style={{textAlign: 'right'}}>ACTION</th>
-                </tr>
-              </thead>
+              <TableHeader labels={['Supplier','Contact Person','Supplier Type','Address','ACTION']} />
+
               <tbody>{items}</tbody>
             </Table>
           </Box>
@@ -213,7 +220,7 @@ Supplier.contextTypes = {
 };
 
 let select = (store) => {
-  return { supplier: store.supplier};
+  return { supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(Supplier);

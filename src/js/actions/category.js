@@ -1,6 +1,15 @@
 import axios from "axios";
-
+import {getHeaders} from  '../utils/restUtil';
 import {CATEGORY_CONSTANTS as c} from  '../utils/constants';
+
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status == 401) {
+    sessionStorage.session = false;
+  }
+  return Promise.reject(error);
+});
 
 export function getCategories () {
   console.log("getCategories()");
@@ -25,7 +34,7 @@ export function addCategory (category) {
 
   return function (dispatch) {
     console.log(category);
-    axios.post(window.serviceHost + '/categories', JSON.stringify(category), {headers: {'Content-Type':'application/json'}})
+    axios.post(window.serviceHost + '/categories', JSON.stringify(category), {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 201) {
@@ -42,7 +51,7 @@ export function updateCategory (category) {
   console.log('updateCategory');
   return function (dispatch) {
     console.log(category);
-    axios.put(category._links.self.href, JSON.stringify(category),{headers: {'Content-Type':'application/json'}})
+    axios.put(category._links.self.href, JSON.stringify(category),{headers: getHeaders()})
     .then((response) => {
       console.log(response);
       if (response.status == 200) {
@@ -60,7 +69,7 @@ export function removeCategory (category) {
   return function (dispatch) {
     console.log(category);
 
-    axios.delete(category._links.self.href)
+    axios.delete(category._links.self.href, {headers: getHeaders()})
     .then((response) => {
       console.log(response);
       dispatch({type: c.CATEGORY_REMOVE_SUCCESS, payload: {category: category}});

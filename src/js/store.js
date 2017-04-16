@@ -5,11 +5,13 @@ import thunk from "redux-thunk";
 import promise from "redux-promise-middleware";
 
 import nav from "./reducers/nav";
+import misc from "./reducers/misc";
+import user from "./reducers/user";
 import category from "./reducers/category";
 import section from "./reducers/section";
 import supplier from "./reducers/supplier";
 
-const reducer = combineReducers({ nav, category, section, supplier});
+const reducer = combineReducers({ nav, misc, user, category, section, supplier});
 
 const middleware = applyMiddleware(promise(), thunk, logger());
 

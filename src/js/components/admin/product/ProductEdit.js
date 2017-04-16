@@ -2,7 +2,8 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 import {updateProduct}  from '../../../actions/product';
-import {SUPPLIER_CONSTANTS as c}  from '../../../utils/constants';
+//import {initialize}  from '../../../actions/misc';
+import {PRODUCT_CONSTANTS as c}  from '../../../utils/constants';
 
 import AddIcon from "grommet/components/icons/base/Add";
 import AppHeader from '../../AppHeader';
@@ -31,6 +32,7 @@ class ProductEdit extends Component {
     super();
 
     this.state = {
+      initializing: false,
       product: {},
       errors: [],
       layer: {
@@ -57,6 +59,10 @@ class ProductEdit extends Component {
   }
 
   componentWillMount () {
+    if (!this.props.misc.initialized) {
+      this.context.router.push('/product');
+    }
+
     const {section: {sections},supplier: {suppliers},category: {categories, product}} = this.props;
     let {layer,category,subCategory} = this.state;
 
@@ -125,7 +131,7 @@ class ProductEdit extends Component {
   }
 
   _onClose (event) {  //Main form close
-    this.props.dispatch({type: c.SUPPLIER_ADD_FORM_TOGGLE, payload: {adding: false}});
+    this.props.dispatch({type: c.PRODUCT_EDIT_FORM_TOGGLE, payload: {adding: false}});
   }
 
   _onLayerSubmit (event) {
@@ -352,7 +358,7 @@ ProductEdit.contextTypes = {
 };
 
 let select = (store) => {
-  return {category: store.category, section: store.section, supplier: store.supplier};
+  return {category: store.category, section: store.section, supplier: store.supplier, misc: store.misc};
 };
 
 export default connect(select)(ProductEdit);

@@ -1,8 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component} from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
-import {getCategories} from '../../../actions/category';
-import {removeProduct}  from '../../../actions/product';
+//import {getCategories} from '../../../actions/category';
+import {removeProduct,syncProduct}  from '../../../actions/product';
+import {initialize}  from '../../../actions/misc';
 import {PRODUCT_CONSTANTS as c}  from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
@@ -26,19 +27,23 @@ import Trash from "grommet/components/icons/base/Trash";
 import Title from 'grommet/components/Title';
 //import ProductTile from './ProductTile';
 import UploadIcon from 'grommet/components/icons/base/Upload';
+import SyncIcon from 'grommet/components/icons/base/Sync';
 
 class Product extends Component {
   
   constructor () {
     super();
     this.state = {
+      initializing: false,
       errors: [],
       products: [],
       product: {},
       searchText: '',
       filterActive: false,
       filteredCount: 0,
-      unfilteredCount: 0
+      unfilteredCount: 0,
+      page: 1,
+      productNotAvailable: false  //Whether product is available for select filter
     };
     this.localeData = localeData();
     this._loadProduct = this._loadProduct.bind(this);
@@ -48,50 +53,73 @@ class Product extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    const {loaded,categories,filter,sort} = this.props.category;
-    if (!loaded) {
-      this.props.dispatch(getCategories());
-    } else {
-      // this._loadSubCategory(categories,filter,sort);
-      // this.setState({cFilter: this.props.category.categories[0].name});
-      this._loadProduct(categories,filter,sort);
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }else{
+      const {categories,filter,sort} = this.props.category;
+      this._loadProduct(categories,filter,sort,this.state.page);
     }
   }
 
   componentWillReceiveProps (nextProps) {
-    console.log('componentWillReceiveProps');
-    // if (!this.props.category.loaded && nextProps.category.loaded) {
-    //   this.setState({cFilter: nextProps.category.categories[0].name});
-    // }
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
+      this.setState({initializing: false});
+      const {categories,filter,sort} = nextProps.category;
+      this._loadProduct(categories,filter,sort,this.state.page);
+    }
+    if (this.props.misc.initialized && !nextProps.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
+    }
     if (this.props.category.toggleStatus != nextProps.category.toggleStatus) {
       const {categories,filter,sort} = nextProps.category;
-      this._loadProduct(categories,filter,sort);
+      this._loadProduct(categories,filter,sort,this.state.page);
     }
   }
 
-  _loadProduct (categories,filter,sort) {
-    console.log("_loadProduct()");
-    let list1 = [] ;
-    categories.forEach(c => {
-      c.subCategoryList.forEach(sc => {
-        sc.productList.forEach(p => {
-          list1.push({...p, subCategory: sc, category: c});
-        });
-      });
-    });
+  _onMoreProducts () {
+    const {categories,filter,sort} = this.props.category;
+    let page = this.state.page;
+    page = page+1;
+    this._loadProduct(categories,filter,sort,page);
+  }
 
-    console.log(list1);
+  _loadProduct (categories,filter,sort,page) {
+    console.log("_loadProduct()");
+    let products = this.props.category.products;
+    const unfilteredCount = products.length;
+    console.log(filter);
+    console.log('unfiltered =' + unfilteredCount);
+    if ('class' in filter) {
+      const classFilter = filter.class;
+      console.log(classFilter);
+      products = products.filter(p => classFilter.includes(p.classType));  
+    }
 
     if ('category' in filter) {
-
       const categoryFilter = filter.category;
-      let list2 = list1.filter(c => categoryFilter.includes(c.category.name));
-      list2 = this._productSort(list2,sort);
-      this.setState({products: list2, filteredCount: list2.length, unfilteredCount: list1.length});    
-    } else {
-      list1 = this._productSort(list1,sort);
-      this.setState({products: list1, filteredCount: list1.length, unfilteredCount: list1.length}); 
+      products = products.filter(p => categoryFilter.includes(p.category.name));  
     }
+
+    // const subCategoryFilter = filter.subCategory;
+    // if (!subCategoryFilter.includes('All')) {
+    //   products = products.filter(p => subCategoryFilter.includes(p.subCategory.name));
+    // }
+
+    // const sectionFilter = filter.section;
+    // if (!sectionFilter.includes('All')) {
+    //   products = products.filter(p => sectionFilter.includes(p.subCategory.name));
+    // }
+
+    const filteredCount = products.length;
+    let productNotAvailable = false;
+    if (filteredCount == 0) {
+      productNotAvailable = true;
+    }
+    products = products.slice(0,20*page);
+    //products = this._productSort(products,sort);
+    this.setState({products, filteredCount, unfilteredCount, page, productNotAvailable}); 
   }
 
   _productSort (products,sort) {
@@ -111,8 +139,6 @@ class Product extends Component {
   }
 
   _onFilterActivate () {
-    console.log(this.props.category.filter);
-    console.log(this.props.category.sort);
     this.setState({filterActive: true});
   }
 
@@ -149,6 +175,14 @@ class Product extends Component {
     this.context.router.push('/product/edit');
   }
 
+  _onSyncClick () {
+    const value = confirm('Are you sure you want to re-assign dynamically calculated value for products?');
+    if (!value) {
+      return;
+    }
+    this.props.dispatch(syncProduct());
+  }
+
   _onHelpClick () {
     window.open("http://localhost:8080/help/product");
   }
@@ -176,8 +210,8 @@ class Product extends Component {
     const items = products.map((p, index)=>{
       let sections = '  ';
       p.sectionList.forEach(s => sections += s.name + ', ');
-      let suppliers = '  ';
-      p.supplierList.forEach(s => suppliers += s.name + ', ');
+      // let suppliers = '  ';
+      // p.supplierList.forEach(s => suppliers += s.name + ', ');
       return (
         <TableRow key={index}  >
           <td >{p.id}</td>
@@ -186,7 +220,8 @@ class Product extends Component {
           <td >{p.category.name}</td>
           <td >{p.subCategory.name}</td>
           <td >{sections.substring(0,sections.length-2).trim()}</td>
-          <td >{suppliers.substring(0,suppliers.length-2).trim()}</td>
+          {/*<td >{suppliers.substring(0,suppliers.length-2).trim()}</td>*/}
+          <td >{p.noOfBins}</td>
           <td>{p.price}</td>
           <td>{p.classType}</td>
           <td style={{textAlign: 'right', padding: 0}}>
@@ -201,14 +236,32 @@ class Product extends Component {
   }
 
   render() {
-    const {fetching} = this.props.category;
-    const { products, searchText, filterActive,filteredCount,unfilteredCount } = this.state;
+    const {refreshing} = this.props.category;
+    const { products, searchText, filterActive, filteredCount, unfilteredCount, initializing, productNotAvailable } = this.state;
 
-    const loading = fetching ? (<Spinning />) : null;
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
+
+    const loading = refreshing ? (<Spinning />) : null;
 
     const items = this._renderProducts(products);
 
     const layerFilter = filterActive ? <ProductFilter onClose={this._onFilterDeactivate.bind(this)}/> : null;
+
+    let productItem = productNotAvailable ? <Box size="medium" alignSelf="center" pad={{horizontal:'medium'}}><h3>No Product available</h3></Box>: (
+      <Table scrollable={true} onMore={this._onMoreProducts.bind(this)}>
+        <TableHeader labels={['Id','ItemCode','Product Name','Category','Sub Category','Section','No. of Bins', 'Price', 'Class Type','ACTION']} />
+        
+        <tbody>{items}</tbody>
+      </Table>
+    );
 
     /*let addControl;
     if ('read only' !== role) {
@@ -220,7 +273,7 @@ class Product extends Component {
     let addControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
     let uploadControl = (<Anchor icon={<UploadIcon />} path='/product/upload' a11yTitle={`Upload Product`} onClick={this._onUploadClick.bind(this)}/>);
     let helpControl = (<Button icon={<HelpIcon />}  onClick={this._onHelpClick.bind(this)}/>);
-    //let editControl = (<Anchor icon={<Add />} path='/product/add' a11yTitle={`Add Product`} onClick={this._onAddClick.bind(this)}/>);
+    let syncControl = (<Button icon={<SyncIcon />}  onClick={this._onSyncClick.bind(this)}/>);
 
 
     return (
@@ -235,6 +288,7 @@ class Product extends Component {
             value={searchText} onDOMChange={this._onSearch.bind(this)} />
           {uploadControl}
           {addControl}
+          {syncControl}
           <FilterControl filteredTotal={filteredCount}
             unfilteredTotal={unfilteredCount}
             onClick={this._onFilterActivate.bind(this)} />
@@ -247,13 +301,7 @@ class Product extends Component {
             {/*<Tiles fill={true} flush={true}>
               {items}
             </Tiles>*/}
-
-            <Table scrollable={true}>
-              <TableHeader labels={['Id','ItemCode','Product Name','Category','Sub Category','Section','Supplier', 'Price', 'Class Type','ACTION']} />
-              
-              <tbody>{items}</tbody>
-            </Table>
-
+            {productItem}
           </Box>
         </Section>
         {layerFilter}
@@ -263,11 +311,11 @@ class Product extends Component {
 }
 
 Product.contextTypes = {
-  router: PropTypes.object
+  router: React.PropTypes.object.isRequired
 };
 
 let select = (store) => {
-  return { category: store.category};
+  return { category: store.category, misc: store.misc};
 };
 
 export default connect(select)(Product);

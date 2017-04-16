@@ -37,8 +37,10 @@ module.exports = {
      /////////////////////// Product ////////////////////////
   "label_product_add": "Add Product",
   "label_product_edit": "Update Product",
+  "label_product_upload": "Upload Product",
   "product_add_btn": "Add",
   "product_edit_btn": "Update",
+  "product_upload_btn": "Upload",
 
   "test": "test"
 

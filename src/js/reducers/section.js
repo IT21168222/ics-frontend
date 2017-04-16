@@ -10,9 +10,10 @@ const initialState = {
 };
 
 const handlers = { 
-  [c.SECTION_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
-  [c.SECTION_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, sections: action.payload.sections}),
-  [c.SECTION_FETCH_FAIL]: (_, action) => ({fetching: false}),
+  [c.INITIALIZE_SECTION]: (_, action) => ({sections: action.payload.sections, loaded: true, toggleStatus: !_.toggleStatus}),
+  // [c.SECTION_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
+  // [c.SECTION_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, sections: action.payload.sections}),
+  // [c.SECTION_FETCH_FAIL]: (_, action) => ({fetching: false}),
   [c.SECTION_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
   [c.SECTION_ADD_SUCCESS]: (_, action) => {
     let sections = _.sections;

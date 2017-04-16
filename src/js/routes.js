@@ -1,8 +1,10 @@
 import Category from "./components/admin/category/Category";
 import Dashboard from "./components/Dashboard";
 import Main from "./components/Main";
+import Login from "./components/Login";
 import Product from "./components/admin/product/Product";
 import ProductAdd from "./components/admin/product/ProductAdd";
+import ProductUpload from "./components/admin/product/ProductUpload";
 import ProductEdit from "./components/admin/product/ProductEdit";
 import Section from "./components/admin/section/Section";
 import SubCategory from "./components/admin/subCategory/SubCategory";
@@ -15,11 +17,13 @@ import Test from "./components/Test";
 export default {
   path: '/',
   component: Main,
-  indexRoute: {component: Dashboard},
+  indexRoute: {component: Login},
   childRoutes: [
+    { path: 'dashboard', component: Dashboard},
     { path: 'category', component: Category},
     { path: 'product', component: Product},
     { path: 'product/add', component: ProductAdd},
+    { path: 'product/upload', component: ProductUpload},
     { path: 'product/edit', component: ProductEdit},
     { path: 'section', component: Section},
     { path: 'subCategory', component: SubCategory},

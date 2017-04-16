@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
-
-import {getCategories} from '../../../actions/category';
+import {initialize}  from '../../../actions/misc';
+//import {getCategories} from '../../../actions/category';
 import {addSubCategory,removeSubCategory,updateSubCategory}  from '../../../actions/subCategory';
 import {SUB_CATEGORY_CONSTANTS as c}  from '../../../utils/constants';
 
@@ -35,6 +35,7 @@ class SubCategory extends Component {
   constructor () {
     super();
     this.state = {
+      initializing: false,
       errors: [],
       subCategories: [],
       subCategory: {},
@@ -51,20 +52,30 @@ class SubCategory extends Component {
 
   componentWillMount () {
     console.log('componentWillMount');
-    const {loaded,categories,filter,sort} = this.props.category;
-    if (!loaded) {
-      this.props.dispatch(getCategories());
+    if (!this.props.misc.initialized) {
+      this.setState({initializing: true});
+      this.props.dispatch(initialize());
     } else {
-      this._loadSubCategory(categories,filter,sort);
-      this.setState({cFilter: this.props.category.categories[0].name});
+      const {categories,filter,sort} = this.props.category;
+      if (categories.length == 0) {
+        alert('You need to add Category first. No SubCategory Available.');
+        this.context.router.push('/category');
+      }else{
+        this._loadSubCategory(categories,filter,sort);
+        let cFilter = categories[0].name;
+        this.setState({cFilter});
+      }
+      
     }
   }
 
   componentWillReceiveProps (nextProps) {
     console.log('componentWillReceiveProps');
-    if (!this.props.category.loaded && nextProps.category.loaded) {
+    if (!this.props.misc.initialized && nextProps.misc.initialized) {
       this.setState({cFilter: nextProps.category.categories[0].name});
+      this.setState({initializing: false});
     }
+
     if (this.props.category.toggleStatus != nextProps.category.toggleStatus) {
       const {categories,filter,sort} = nextProps.category;
       this._loadSubCategory(categories,filter,sort);
@@ -184,7 +195,17 @@ class SubCategory extends Component {
 
   render() {
     const {fetching, adding, editing,categories} = this.props.category;
-    const { subCategories, subCategory, errors, searchText, filterActive,filteredCount,unfilteredCount, cFilter } = this.state;
+    const { subCategories, subCategory, errors, searchText, filterActive,filteredCount,unfilteredCount, cFilter,initializing  } = this.state;
+
+    if (initializing) {
+      return (
+        <Box pad={{vertical: 'large'}}>
+          <Box align='center' alignSelf='center' pad={{vertical: 'large'}}>
+            <Spinning /> Initializing Application ...
+          </Box>
+        </Box>
+      );
+    }
 
     const loading = fetching ? (<Spinning />) : null;
 
@@ -279,9 +300,12 @@ class SubCategory extends Component {
     );
   }
 }
+SubCategory.contextTypes = {
+  router: React.PropTypes.object.isRequired
+};
 
 let select = (store) => {
-  return { category: store.category, subCategory: store.subCategory};
+  return { category: store.category, subCategory: store.subCategory, misc: store.misc};
 };
 
 export default connect(select)(SubCategory);
