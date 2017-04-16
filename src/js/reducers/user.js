@@ -1,7 +1,7 @@
 import {USER_CONSTANTS as c} from "../utils/constants";
 
 const initialState = {
-  authenticated: false,
+  authProgress: false,
   loaded: false,
   fetching: false,
   adding: false,
@@ -12,6 +12,7 @@ const initialState = {
 
 const handlers = { 
   [c.INITIALIZE_USER]: (_, action) => ({users: action.payload.users, loaded: true, toggleStatus: !_.toggleStatus}),
+  [c.USER_AUTH_PROGRESS]: (_, action) => ({authProgress: true}),
   [c.USER_AUTH_SUCCESS]: (_, action) => {
     let users = _.users;
     if (users.length == 0) {
@@ -26,9 +27,9 @@ const handlers = {
     window.sessionStorage.refresh_token = action.payload.data.refresh_token;
     window.sessionStorage.role = user.role;
     window.sessionStorage.session = true;
-    return ({authenticated: false});
+    return ({authProgress: false});
   },
-  [c.USER_AUTH_FAIL]: (_, action) => ({authenticated: false}),
+  [c.USER_AUTH_FAIL]: (_, action) => ({authProgress: false}),
   // [c.USER_FETCH_PROGRESS]: (_, action) => ({fetching: true}),
   // [c.USER_FETCH_SUCCESS]: (_, action) => ({loaded: true, fetching: false,toggleStatus: !_.toggleStatus, users: action.payload.users}),
   // [c.USER_FETCH_FAIL]: (_, action) => ({fetching: false}),

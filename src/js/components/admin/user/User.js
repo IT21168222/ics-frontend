@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { localeData } from '../../../reducers/localization';
 import {initialize}  from '../../../actions/misc';
-import * as userAction  from '../../../actions/user';
-import * as c  from '../../../utils/constants';
+import {addUser,removeUser,updateUser}  from '../../../actions/user';
+import {USER_CONSTANTS as u, USER_ROLES as ur} from '../../../utils/constants';
 
 import AppHeader from '../../AppHeader';
 import Add from "grommet/components/icons/base/Add";
@@ -35,20 +35,13 @@ class User extends Component {
     super();
     this.state = {
       initializing: false,
-      fetching: false,
-      adding: false,
       viewing: false,
-      editing: false,
       users: [],
       errors: [],
       user: {},
-      roles: [c.ROLE_ADMIN,c.ROLE_PURCHASE,c.ROLE_STORE,c.ROLE_USER]
+      roles: [ur.ROLE_ADMIN,ur.ROLE_PURCHASE,ur.ROLE_STORE,ur.ROLE_USER]
     };
     this.localeData = localeData();
-    this.getUsers = userAction.getUsers.bind(this);
-    this.addUser = userAction.addUser.bind(this);
-    this.updateUser = userAction.updateUser.bind(this);
-    this.removeUser = userAction.removeUser.bind(this);
   }
 
   componentWillMount () {
@@ -56,13 +49,28 @@ class User extends Component {
     if (!this.props.misc.initialized) {
       this.setState({initializing: true});
       this.props.dispatch(initialize());
+    }else {
+      this.setState({users: this.props.user.users});
     }
   }
 
   componentWillReceiveProps (nextProps) {
     if (!this.props.misc.initialized && nextProps.misc.initialized) {
       this.setState({initializing: false});
+      this.setState({users: nextProps.user.users});
     }
+
+    if (this.props.user.toggleStatus != nextProps.user.toggleStatus) {
+      this.setState({users: nextProps.user.users});
+    }
+  }
+
+  _addUser () {
+    this.props.dispatch(addUser(this.state.user));
+  }
+
+  _updateUser () {
+    this.props.dispatch(updateUser(this.state.user));
   }
 
   _onChangeInput ( event ) {
@@ -82,11 +90,12 @@ class User extends Component {
     console.log('_onAddClick');
     const user = this.state.user;
     user.role = 'Select Role';
-    this.setState({adding: true, user: user});
+    this.setState({ user: user});
+    this.props.dispatch({type: u.USER_ADD_FORM_TOGGLE, payload: {adding: true}});
   }
 
-  _onRemoveClick (url) {
-    this.removeUser(url);
+  _onRemoveClick (index) {
+    this.props.dispatch(removeUser(this.state.users[index]));
   }
 
   _onViewClick (index) {
@@ -98,21 +107,23 @@ class User extends Component {
   _onEditClick (index) {
     console.log('_onEditClick');
     const users = this.state.users;
-    this.setState({editing: true, user: users[index]});
+    this.setState({user: users[index]});
+    this.props.dispatch({type: u.USER_EDIT_FORM_TOGGLE, payload: {editing: true}});
   }
 
   _onCloseLayer (layer) {
     console.log('_onCloseLayer');
     if( layer == 'add')
-      this.setState({adding: false, user: {}});
+      this.props.dispatch({type: u.USER_ADD_FORM_TOGGLE, payload: {adding: false}});
     else if (layer == 'view')
       this.setState({viewing: false, user: {}});
     else if (layer == 'edit')
-      this.setState({editing: false, user: {}});
+      this.props.dispatch({type: u.USER_EDIT_FORM_TOGGLE, payload: {editing: false}});
   }
 
   render() {
-    let { fetching, adding, viewing, editing, users, user, errors, roles,initializing } = this.state;
+    const {adding,editing,users} = this.props.user;
+    let {viewing, user, errors, roles,initializing } = this.state;
     
     if (initializing) {
       return (
@@ -124,7 +135,9 @@ class User extends Component {
       );
     }
 
-    const loading = fetching ? (<Spinning />) : null;
+    //const busy = adding ? <Spinning /> : null;
+
+    //const loading = fetching ? (<Spinning />) : null;
     const userItems = users.map((user, index)=>{
       return (
         <TableRow key={index}  >
@@ -133,7 +146,7 @@ class User extends Component {
           <td style={{textAlign: 'right', padding: 0}}>
             <Button icon={<View />} onClick={this._onViewClick.bind(this,index)} />
             <Button icon={<Edit />} onClick={this._onEditClick.bind(this,index)} />
-            <Button icon={<Trash />} onClick={this._onRemoveClick.bind(this,user._links.self.href)} />
+            <Button icon={<Trash />} onClick={this._onRemoveClick.bind(this,index)} />
           </td>
         </TableRow>
       );
@@ -158,7 +171,7 @@ class User extends Component {
             </FormField>
           </FormFields>
           <Footer pad={{"vertical": "medium"}} >
-            <Button label="Add" primary={true}  onClick={this.addUser} />
+            <Button label="Add" primary={true}  onClick={this._addUser.bind(this)} />
           </Footer>
         </Form>
       </Layer>
@@ -210,7 +223,7 @@ class User extends Component {
             </FormField>
           </FormFields>
           <Footer pad={{"vertical": "medium"}} >
-            <Button label="Update" primary={true}  onClick={this.updateUser} />
+            <Button label="Update" primary={true}  onClick={this._updateUser.bind(this)} />
           </Footer>
         </Form>
       </Layer>
@@ -234,7 +247,7 @@ class User extends Component {
               </tbody>
             </Table>
           </Box>
-          <Box size="xsmall" alignSelf="center" pad={{horizontal:'medium'}}>{loading}</Box>
+          {/*<Box size="xsmall" alignSelf="center" pad={{horizontal:'medium'}}>{loading}</Box>*/}
           <Box size="small" alignSelf="center" pad={{vertical:'large'}}>
             <Button icon={<Add />} label="Add User" primary={true} a11yTitle="Add item" onClick={this._onAddClick.bind(this)}/>
           </Box>

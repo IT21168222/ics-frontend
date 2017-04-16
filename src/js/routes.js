@@ -12,6 +12,13 @@ import Supplier from "./components/admin/supplier/Supplier";
 import SupplierAdd from "./components/admin/supplier/SupplierAdd";
 import SupplierEdit from "./components/admin/supplier/SupplierEdit";
 import User from "./components/admin/user/User";
+
+import InwardScan from "./components/store/InwardScan";
+import OutwardScan from "./components/store/OutwardScan";
+import BarcodeGenerate from "./components/store/BarcodeGenerate";
+
+import Tracking from './components/purchase/Tracking';
+import Order from './components/purchase/Order';
 import Test from "./components/Test";
 
 export default {
@@ -31,6 +38,11 @@ export default {
     { path: 'supplier/add', component: SupplierAdd},
     { path: 'supplier/edit', component: SupplierEdit},
     { path: 'user', component: User},
+    { path: 'inward', component: InwardScan},
+    { path: 'outward', component: OutwardScan},
+    { path: 'barcode', component: BarcodeGenerate},
+    { path: 'tracking', component: Tracking},
+    { path: 'order', component: Order},
     { path: 'test', component: Test}
   ]
 };

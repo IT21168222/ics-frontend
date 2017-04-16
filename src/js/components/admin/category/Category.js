@@ -53,6 +53,9 @@ class Category extends Component {
     if (!this.props.misc.initialized && nextProps.misc.initialized) {
       this.setState({initializing: false});
     }
+    if (sessionStorage.session == undefined) {
+      this.context.router.push('/');
+    }
   }
 
   _addCategory () {

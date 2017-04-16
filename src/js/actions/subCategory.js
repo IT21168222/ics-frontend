@@ -6,7 +6,7 @@ axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   if (error.response.status == 401) {
-    sessionStorage.session = false;
+    delete sessionStorage.session;
   }
   return Promise.reject(error);
 });

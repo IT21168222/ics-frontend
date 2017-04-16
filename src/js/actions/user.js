@@ -7,7 +7,7 @@ axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   if (error.response.status == 401) {
-    sessionStorage.session = false;
+    delete sessionStorage.session;
   }
   return Promise.reject(error);
 });
@@ -16,7 +16,7 @@ export function authenticate (username, password) {
   console.log('authenticate');
 
   return function (dispatch) {
-
+    dispatch({type: u.USER_AUTH_PROGRESS});
     const config = {
       method: 'post',
       url: "http://localhost:8000/oauth/token",
@@ -39,7 +39,7 @@ export function authenticate (username, password) {
 
     }).catch( (err) => {
       console.log(err);
-      dispatch({type: c.USER_AUTH_FAIL});
+      dispatch({type: u.USER_AUTH_FAIL});
     });
   };
   
@@ -65,47 +65,52 @@ export function getUsers () {
   });
 }
 
-export function addUser () {
+export function addUser (user) {
   console.log('addUser');
-  const { user } = this.state;
-  console.log(user);
-  this.setState({adding: true});
-  axios.post(window.serviceHost + '/users', JSON.stringify(user), {headers: getHeaders()})
-  .then((response) => {
-    console.log(response);
-    this.setState({adding: false});
-    getUsers.bind(this)();
-  }).catch( (err) => {
-    console.log(err);
-    this.setState({adding: false});
-  });
+  return function (dispatch) {
+    axios.post(window.serviceHost + '/users', JSON.stringify(user), {headers: getHeaders()})
+    .then((response) => {
+      console.log(response);
+      if (response.status == 201) {
+        dispatch({type: u.USER_ADD_SUCCESS, payload: {user: response.data}});
+      }
+    }).catch( (err) => {
+      console.log(err);
+      dispatch({type: u.USER_ADD_FAIL});
+    });
+  };
+  
 }
 
-export function updateUser () {
+export function updateUser (user) {
   console.log('updateUser');
-
-  console.log(user);
-  this.setState({editing: true});
-  axios.put(user._links.self.href, JSON.stringify(user),{headers: getHeaders()})
-  .then((response) => {
-    console.log(response);
-    this.setState({editing: false});
-    getUsers.bind(this)();
-  }).catch( (err) => {
-    console.log(err);
-    this.setState({editing: false});
-  });
+  return function (dispatch) {
+    axios.put(window.serviceHost + '/users/' + user.id, JSON.stringify(user), {headers: getHeaders()})
+    .then((response) => {
+      console.log(response);
+      if (response.status == 200) {
+        dispatch({type: u.USER_EDIT_SUCCESS, payload: {user: response.data}});
+      }
+    }).catch( (err) => {
+      console.log(err);
+      dispatch({type: u.USER_EDIT_FAIL});
+    });
+  };
 }
 
-export function removeUser (url) {
+export function removeUser (user) {
   console.log('removeUser');
-  axios.delete(url, {headers: getHeaders()})
-  .then((response) => {
-    console.log(response);
-    getUsers.bind(this)();
-  }).catch( (err) => {
-    console.log(err);
-  });
+  return function (dispatch) {
+    axios.delete(window.serviceHost + '/users/' + user.id, {headers: getHeaders()})
+    .then((response) => {
+      if (response.status == 204 || response.status == 200) {
+        dispatch({type: u.USER_REMOVE_SUCCESS, payload: {user}});
+      }
+    }).catch( (err) => {
+      console.log(err);
+      dispatch({type: u.USER_REMOVE_FAIL});
+    });
+  };
 }
 
 export function test (msg) {

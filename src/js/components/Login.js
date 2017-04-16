@@ -25,7 +25,8 @@ class Login extends Component {
       errors: [],
       isForgot: false,
       email: '',
-      changing: false  //changing password
+      changing: false,  //changing password
+      errorMsg: ''
     };
 
     this.localeData = localeData();
@@ -46,6 +47,12 @@ class Login extends Component {
     console.log('componentWillReceiveProps');
     if (nextProps.misc.initialized) {
       this.setState({initializing: false});
+    }
+    console.log(sessionStorage);
+    
+    if (this.props.user.authProgress && !nextProps.user.authProgress && sessionStorage.session == undefined) {
+      console.log('check');
+      this.setState({errorMsg: "Incorrect email or password, try again!"});
     }
 
     if (sessionStorage.session == 'true') {
@@ -101,7 +108,7 @@ class Login extends Component {
 
   render () {
 
-    const { initializing, credential, errors,isForgot } = this.state;
+    const { initializing, credential, errors,isForgot, errorMsg } = this.state;
 
     if (initializing) {
       return (
@@ -137,7 +144,7 @@ class Login extends Component {
                 </FormField>
               </FormFields>
               <a style={{color:'blue'}} onClick={this._forgotPasswordClick.bind(this)}>Forgot password?</a>
-              {/*<p style={{color:'red'}} >{error}</p>*/}
+              <p style={{color:'red'}} >{errorMsg}</p>
               <Footer pad={{"vertical": "small"}}>
                 <Button label="Login" fill={true} primary={true}  onClick={this._login.bind(this)} />
               </Footer>

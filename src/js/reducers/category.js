@@ -1,4 +1,5 @@
 import {CATEGORY_CONSTANTS as c, SUB_CATEGORY_CONSTANTS as sc, PRODUCT_CONSTANTS as p} from "../utils/constants";
+import {getProductId} from "../utils/miscUtil";
 
 const initialState = {
   fetching: false,
@@ -25,7 +26,7 @@ const handlers = {
     categories.forEach(c => {
       c.subCategoryList.forEach(sc => {
         sc.productList.forEach(p => {
-          products.push({...p, subCategory: sc, category: c});
+          products.push({...p, subCategory: {id: sc.id, name: sc.name}, category: {id: c.id, name: c.name}, productId: getProductId(c.id,sc.id,p.id)});
         });
       });
     });
@@ -94,7 +95,8 @@ const handlers = {
   //////////////////////////////////////////////// Product /////////////////////////////////////////////////////////
   [p.PRODUCT_ADD_FORM_TOGGLE]: (_, action) => ({adding: action.payload.adding}),
   [p.PRODUCT_ADD_SUCCESS]: (_, action) => {
-    const product = action.payload.product;
+    let product = action.payload.product;
+    product = {...product, productId: getProductId(product.category.id,product.subCategory.id,product.id)};
     let products = _.products;
     products.push(product);
     let categories = _.categories;

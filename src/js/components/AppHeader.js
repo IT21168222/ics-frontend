@@ -38,7 +38,7 @@ class AppHeader extends Component {
     delete sessionStorage.email;
     delete sessionStorage.username;
     delete sessionStorage.role;
-    sessionStorage.session = false;
+    delete sessionStorage.session;
   }
 
   render () {

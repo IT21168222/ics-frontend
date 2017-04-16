@@ -214,7 +214,7 @@ class Product extends Component {
       // p.supplierList.forEach(s => suppliers += s.name + ', ');
       return (
         <TableRow key={index}  >
-          <td >{p.id}</td>
+          <td >{p.productId}</td>
           <td>{p.itemCode}</td>
           <td >{p.name}</td>
           <td >{p.category.name}</td>
@@ -257,7 +257,7 @@ class Product extends Component {
 
     let productItem = productNotAvailable ? <Box size="medium" alignSelf="center" pad={{horizontal:'medium'}}><h3>No Product available</h3></Box>: (
       <Table scrollable={true} onMore={this._onMoreProducts.bind(this)}>
-        <TableHeader labels={['Id','ItemCode','Product Name','Category','Sub Category','Section','No. of Bins', 'Price', 'Class Type','ACTION']} />
+        <TableHeader labels={['Product Id','ItemCode','Product Name','Category','Sub Category','Section','No. of Bins', 'Price', 'Class Type','ACTION']} />
         
         <tbody>{items}</tbody>
       </Table>

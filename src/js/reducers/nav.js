@@ -13,10 +13,17 @@ const initialState = {
     { path: '/test', label: 'Test Page'}
   ],
   itemsStore:[
-     { path: '/dashboard', label: 'Home'}
+     { path: '/dashboard', label: 'Home'},
+     { path: '/inward', label: 'Inward Scan'},
+     { path: '/outward', label: 'Outward Scan'},
+     { path: '/barcode', label: 'Generate Barcode'},
+     { path: '/test', label: 'Test Page'}
   ],
   itemsPurchase:[
-     { path: '/dashboard', label: 'Home'}
+     { path: '/dashboard', label: 'Home'},
+     { path: '/tracking', label: 'Tracking'},
+     { path: '/order', label: 'Order'},
+     { path: '/test', label: 'Test Page'}
   ],
   itemsUser:[
      { path: '/dashboard', label: 'Home'}
